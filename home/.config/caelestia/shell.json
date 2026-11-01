@@ -15,6 +15,18 @@
             "terminal": [
                 "ptyxis"
             ]
+        },
+        "idle": {
+            "timeouts": [
+                {
+                    "timeout": 3600,
+                    "idleAction": [
+                        "systemctl",
+                        "suspend-then-hibernate"
+                    ],
+                    "inhibitWhenCharging": true
+                }
+            ]
         }
     },
     "launcher": {

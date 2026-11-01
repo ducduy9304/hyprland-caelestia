@@ -20,4 +20,8 @@ return {
     -- SUPER + F maximizes (bar visible), SUPER + ALT + F is true fullscreen
     kbWindowFullscreen         = "SUPER + ALT + F",
     kbWindowBorderedFullscreen = "SUPER + F",
+
+    -- SUPER + J / SUPER + K: previous / next workspace
+    kbNextWs = { "SUPER + mouse_down", "CTRL + SUPER + Right", "SUPER + Page_Down", "SUPER + K" },
+    kbPrevWs = { "SUPER + mouse_up", "CTRL + SUPER + Left", "SUPER + Page_Up", "SUPER + J" },
 }

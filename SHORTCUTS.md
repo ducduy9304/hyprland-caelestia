@@ -43,7 +43,6 @@ Every key and gesture on this setup, checked against `hyprctl binds` on the refe
 | `Super + Alt + Space` | Float / unfloat the window | |
 | `Super + ←↑→↓` | Move focus to the window in that direction | |
 | `Super + Shift + ←↑→↓` | Move the window that way. With two windows side by side, `Shift + ↓` stacks them top/bottom and puts this one at the bottom (same idea for the other arrows) | custom |
-| `Super + J` | Flip a split between side by side and top/bottom | custom |
 | `Super + Tab` | Focus the next window | custom |
 | `Super + Minus` / `Super + Equal` | Make the window narrower / wider | |
 | `Super + Shift + Minus` / `Super + Shift + Equal` | Make the window shorter / taller | |
@@ -67,6 +66,7 @@ New windows open maximized (custom rule). Press `Super + F` to drop back into th
 | `Super + Shift + 1` … `0` | Move the window there and stay here |
 | `Ctrl + Super + ←` / `→` | Previous / next workspace |
 | `Super + Page Up` / `Page Down` | Previous / next workspace |
+| `Super + J` / `Super + K` | Previous / next workspace | custom |
 | `Super + mouse wheel` | Scroll through workspaces |
 | `Ctrl + Super + Shift + ←` / `→` | Move the window to the previous / next workspace |
 | `Super + Alt + Page Up` / `Page Down` | Same, other keys |

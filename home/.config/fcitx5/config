@@ -1,2 +1,6 @@
 [Hotkey/TriggerKeys]
 0=Super+space
+
+[Behavior]
+# Hide fcitx5 popup on IM switch; the Hyprland-bound script shows a notification instead
+ShowInputMethodInformation=False

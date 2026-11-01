@@ -142,7 +142,7 @@ The full key list is in [SHORTCUTS.md](SHORTCUTS.md). Learn the first table ther
 | Press `Super` for Activities | Tap `Super` for the launcher |
 | Minimize a window | Move it to another workspace: `Super + Alt + 2` |
 | Use Alt + Tab | Use `Super + Tab`, or `Super + arrows` to jump to the window on that side |
-| Snap a window to half the screen | Open two windows: they split automatically. `Super + J` flips side by side and top/bottom |
+| Snap a window to half the screen | Open two windows: they split automatically. `Super + Shift + ↓` stacks them top/bottom |
 | Use Settings for the touchpad | Edit the `hl.device` block in `~/.config/caelestia/hypr-user.lua`, then `hyprctl reload` |
 | Take a screenshot with `Print` | `Super + Shift + S`: drag a region or click for the whole screen. Click the notification to draw on it |
 | Switch input with `Super + Space` | Same key, now through fcitx5 |

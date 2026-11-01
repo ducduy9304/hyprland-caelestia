@@ -283,7 +283,8 @@ hyprctl reload; hyprctl configerrors
 | Touchpad: 2-finger right click, speed, gestures | `hypr-user.lua`, `hypr-vars.lua` |
 | Drag the gap between windows to resize | `hypr-user.lua` |
 | `Super + Shift + arrows` re-splits two windows so the focused one lands on that side | `hypr-user.lua` |
-| Emergency exit, Mac-style extras, `Super + J` split flip | `hypr-user.lua` |
+| Emergency exit, Mac-style extras | `hypr-user.lua` |
+| `Super + J` / `Super + K` switch to the previous / next workspace | `hypr-vars.lua` |
 | Next wallpaper on `Super + W` | `hypr-user.lua`, `bin/wallpaper-next` |
 | Starts polkit agent, fcitx5, NetBird tray at login | `hypr-user.lua` |
 | Monitor resolution, refresh rate and position via nwg-displays 0.5.0 (first version with Lua output; install from GitHub with `nix profile add --impure --expr` overriding `nwg-displays` src, using Caelestia's locked nixpkgs to skip a big download). Loads `~/.config/hypr/monitors.lua` | `hypr-user.lua`, `share/applications/nwg-displays.desktop` |

@@ -114,8 +114,7 @@ end
 -- Emergency exit back to the login screen, works even if Caelestia is broken
 hl.bind("CTRL + SUPER + SHIFT + Escape", hl.dsp.exit())
 
--- Flip a split between side by side and top/bottom
-hl.bind("SUPER + J", hl.dsp.layout("togglesplit"))
+-- SUPER + J / SUPER + K switch workspaces (see hypr-vars.lua)
 
 -- Mac-style keys (SUPER = Cmd)
 hl.bind("SUPER + Tab", hl.dsp.window.cycle_next())
