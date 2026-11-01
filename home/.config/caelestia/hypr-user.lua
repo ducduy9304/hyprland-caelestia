@@ -136,3 +136,6 @@ hl.on("hyprland.start", function()
     -- Hyprland doesn't run ~/.config/autostart, so start the NetBird tray here
     hl.exec_cmd("netbird-ui")
 end)
+
+-- Monitor layout saved by nwg-displays (~/.config/hypr/monitors.lua)
+pcall(require, "monitors")

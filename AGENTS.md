@@ -286,6 +286,7 @@ hyprctl reload; hyprctl configerrors
 | Emergency exit, Mac-style extras, `Super + J` split flip | `hypr-user.lua` |
 | Next wallpaper on `Super + W` | `hypr-user.lua`, `bin/wallpaper-next` |
 | Starts polkit agent, fcitx5, NetBird tray at login | `hypr-user.lua` |
+| Monitor resolution, refresh rate and position via nwg-displays 0.5.0 (first version with Lua output; install from GitHub with `nix profile add --impure --expr` overriding `nwg-displays` src, using Caelestia's locked nixpkgs to skip a big download). Loads `~/.config/hypr/monitors.lua` | `hypr-user.lua`, `share/applications/nwg-displays.desktop` |
 | Default apps, cursor, disabled default binds | `hypr-vars.lua` |
 | Notification click runs its action, launcher size, weather, no session gif, terminal | `shell.json` |
 | Thinner bar | `shell-tokens.json` |
