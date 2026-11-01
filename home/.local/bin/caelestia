@@ -1,0 +1,32 @@
+#!/bin/sh
+# The Nix-built shell needs nixGL to load the host GPU drivers.
+# Hybrid BIOS mode: the laptop panel is on the AMD iGPU, so Mesa (nixGLIntel) is right.
+# dGPU/G-Sync BIOS mode: every connected screen is on the NVIDIA GPU, so use nixGLNvidia,
+# which only works when it was built for the exact running driver version.
+
+gl="$HOME/.nix-profile/bin/nixGLIntel"
+
+on_nvidia_only() {
+    found=1
+    for status in /sys/class/drm/card*-*/status; do
+        [ "$(cat "$status")" = connected ] || continue
+        name=$(basename "$(dirname "$status")")
+        vendor=$(cat "/sys/class/drm/${name%%-*}/device/vendor" 2>/dev/null)
+        [ "$vendor" = 0x10de ] || return 1
+        found=0
+    done
+    return $found
+}
+
+if on_nvidia_only; then
+    driver=$(cat /sys/module/nvidia/version 2>/dev/null)
+    nvidia_gl="$HOME/.nix-profile/bin/nixGLNvidia-$driver"
+    if [ -x "$nvidia_gl" ]; then
+        gl="$nvidia_gl"
+    else
+        notify-send -u critical "Caelestia: nixGLNvidia missing" \
+            "NVIDIA driver is $driver. Run: install-nixgl-nvidia"
+    fi
+fi
+
+exec "$gl" "$HOME/.nix-profile/bin/caelestia" "$@"

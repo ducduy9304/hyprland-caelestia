@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Fcitx 5
+Comment=Vietnamese input (bamboo) in GNOME. Hyprland starts fcitx5 from hypr-user.lua instead.
+Exec=fcitx5 -d --replace
+Icon=fcitx
+OnlyShowIn=GNOME;
+X-GNOME-Autostart-enabled=true

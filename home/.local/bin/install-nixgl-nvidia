@@ -1,0 +1,24 @@
+#!/bin/sh
+# Install nixGLNvidia for the running NVIDIA driver. Run again after every driver update.
+# nixGL can't auto-detect the open kernel module ("Open Kernel Module for x86_64  X.Y.Z"),
+# so the version is passed explicitly.
+set -e
+
+version=$(cat /sys/module/nvidia/version)
+echo "NVIDIA driver: $version"
+
+# Drop older nixGLNvidia builds so only the matching one stays
+nix profile list --json | jq -r '.elements | keys[] | select(startswith("nixGLNvidia"))' |
+    while read -r old; do nix profile remove "$old"; done
+
+nix profile add --impure --expr "
+  let
+    nixgl = builtins.getFlake \"github:nix-community/nixGL\";
+    pkgs = import nixgl.inputs.nixpkgs { system = \"x86_64-linux\"; config.allowUnfree = true; };
+  in (import \"\${nixgl}/default.nix\" {
+    inherit pkgs;
+    nvidiaVersion = \"$version\";
+    enable32bits = false;
+  }).nixGLNvidia"
+
+ls "$HOME/.nix-profile/bin/" | grep nixGLNvidia

@@ -1,0 +1,35 @@
+#!/bin/sh
+# GNOME/Mac-style capture: drag to select a region, click to take the whole screen, Esc to cancel.
+#   capture shot    screenshot, saved to ~/Pictures/Screenshots and copied; click the toast to edit
+#   capture record  screen recording with sound; run again to stop
+
+case "$1" in
+record)
+    if pidof gpu-screen-recorder >/dev/null; then
+        exec caelestia record
+    fi
+    region=$(slurp -o -f '%wx%h+%x+%y') || exit 0
+    exec caelestia record -s -r "$region"
+    ;;
+shot)
+    dir="$HOME/Pictures/Screenshots"
+    mkdir -p "$dir"
+    f="$dir/Screenshot From $(date '+%Y-%m-%d %H-%M-%S').png"
+
+    # Freeze the screen while selecting
+    hyprpicker -r -z & freeze=$!
+    sleep 0.2
+    region=$(slurp -o)
+    [ -n "$region" ] && grim -g "$region" "$f"
+    kill "$freeze" 2>/dev/null
+    [ -f "$f" ] || exit 0
+
+    wl-copy --type image/png < "$f"
+    action=$(notify-action Screenshot "$f" "Screenshot taken" "Copied to clipboard. Click to edit." edit Edit)
+    [ "$action" = edit ] && swappy -f "$f" -o "$f"
+    ;;
+*)
+    echo "usage: capture shot|record" >&2
+    exit 1
+    ;;
+esac

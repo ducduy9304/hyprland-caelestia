@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Switch to the next wallpaper in ~/Pictures/Wallpapers (alphabetical, wraps around)
+set -euo pipefail
+dir="$HOME/Pictures/Wallpapers"
+current=$(cat "$HOME/.local/state/caelestia/wallpaper/path.txt" 2>/dev/null || true)
+mapfile -t walls < <(find "$dir" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) | sort)
+(( ${#walls[@]} )) || exit 0
+next=${walls[0]}
+for i in "${!walls[@]}"; do
+    if [[ ${walls[$i]} == "$current" ]]; then
+        next=${walls[$(( (i + 1) % ${#walls[@]} ))]}
+        break
+    fi
+done
+exec caelestia wallpaper -f "$next"

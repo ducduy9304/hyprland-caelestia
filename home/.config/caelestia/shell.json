@@ -1,0 +1,34 @@
+{
+    "appearance": {
+        "transparency": {
+            "enabled": true,
+            "base": 0.5,
+            "layers": 1
+        }
+    },
+    "dashboard": {
+        "showClockSeconds": false,
+        "showDashboard": true
+    },
+    "general": {
+        "apps": {
+            "terminal": [
+                "ptyxis"
+            ]
+        }
+    },
+    "launcher": {
+        "maxShown": 12
+    },
+    "notifs": {
+        "actionOnClick": true
+    },
+    "services": {
+        "sensorUnits": "Celsius",
+        "weatherUnits": "Celsius",
+        "weatherLocation": "10.9289,108.1021"
+    },
+    "paths": {
+        "sessionGif": ""
+    }
+}

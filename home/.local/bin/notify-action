@@ -1,0 +1,34 @@
+#!/usr/bin/python3
+# Show a notification with one action button and print the action key if it is clicked.
+# Ubuntu's notify-send wrongly reports that Caelestia has no actions, so this talks to D-Bus directly.
+# usage: notify-action APP ICON SUMMARY BODY KEY LABEL
+import sys
+
+from gi.repository import Gio, GLib
+
+app, icon, summary, body, key, label = sys.argv[1:7]
+bus = Gio.bus_get_sync(Gio.BusType.SESSION)
+loop = GLib.MainLoop()
+nid = None
+
+
+def on_signal(_conn, _sender, _path, _iface, signal, params):
+    if params[0] != nid:
+        return
+    if signal == "ActionInvoked":
+        print(params[1])
+    loop.quit()
+
+
+bus.signal_subscribe(None, "org.freedesktop.Notifications", None, "/org/freedesktop/Notifications",
+                     None, Gio.DBusSignalFlags.NONE, on_signal)
+nid = bus.call_sync(
+    "org.freedesktop.Notifications", "/org/freedesktop/Notifications", "org.freedesktop.Notifications", "Notify",
+    GLib.Variant("(susssasa{sv}i)", (app, 0, icon, summary, body, [key, label],
+                                     {"image-path": GLib.Variant("s", icon)}, -1)),
+    GLib.VariantType("(u)"), Gio.DBusCallFlags.NONE, -1, None,
+).unpack()[0]
+
+# Stop waiting after 5 minutes so nothing lingers in the background
+GLib.timeout_add_seconds(300, loop.quit)
+loop.run()
