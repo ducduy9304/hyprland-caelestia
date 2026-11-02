@@ -1,0 +1,13 @@
+// Screen recording (caelestia record -> gpu-screen-recorder) asks pkexec to run gsr-kms-server as
+// root on every start, because a Nix-built binary can't keep cap_sys_admin. This allows that one
+// binary for admins in the active local session, without a password.
+// The exact store path is pinned on purpose: any other program, including another build of
+// gpu-screen-recorder, still asks. After a Nix update of the recorder the prompt comes back;
+// put the new path here (readlink -f of gsr-kms-server next to gpu-screen-recorder) and copy again.
+polkit.addRule(function (action, subject) {
+    if (action.id == "org.freedesktop.policykit.exec" &&
+        action.lookup("program") == "/nix/store/sjlks50ppy31431rpkpqnr5x4i891rkv-gpu-screen-recorder-6.1.4/bin/gsr-kms-server" &&
+        subject.isInGroup("sudo") && subject.local && subject.active) {
+        return polkit.Result.YES;
+    }
+});

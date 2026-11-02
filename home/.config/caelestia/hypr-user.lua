@@ -138,3 +138,6 @@ end)
 
 -- Monitor layout saved by nwg-displays (~/.config/hypr/monitors.lua)
 pcall(require, "monitors")
+
+-- label_defect inspection app (uv run app/label_check_app.py) always opens on the MSI screen
+hl.window_rule({ match = { title = "AITS ROBOT - label inspection" }, monitor = "desc:Microstep MSI MP242L" })

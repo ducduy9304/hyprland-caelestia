@@ -177,6 +177,7 @@ After editing a Hyprland file, run `hyprctl reload`. A red bar at the top means 
 | `.local/bin/notify-action` | Notification with a clickable action (Ubuntu's `notify-send` can't do it with Caelestia) |
 | `.local/bin/wallpaper-next` | Next wallpaper in name order |
 | `system/etc/tmpfiles.d/nix-unix-chkpwd.conf` | Lets the Nix-built lock screen check passwords |
+| `system/etc/polkit-1/rules.d/50-gsr-kms-server.rules` | Screen recording starts without a password prompt (pinned to one recorder build) |
 
 ## Reference links
 
