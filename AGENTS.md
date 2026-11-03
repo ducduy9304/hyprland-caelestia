@@ -176,7 +176,7 @@ Ubuntu 26.04 (the exact list used on the reference machine):
 ```bash
 sudo apt install -y foot thunar fuzzel cliphist gammastep trash-cli fonts-jetbrains-mono brightnessctl \
   grim slurp swappy wl-clipboard libnotify-bin python3-gi jq btop git nautilus ptyxis \
-  xdg-desktop-portal-gtk gnome-keyring
+  xdg-desktop-portal-gtk gnome-keyring papirus-icon-theme
 ```
 
 Ubuntu 24.04: drop `swappy` and `ptyxis` from that line. Install swappy with `nix profile add nixpkgs#swappy` after Nix is in, and keep `gnome-terminal` (or install Ptyxis from Flathub as `app.devsuite.Ptyxis`), then change `terminal` in `hypr-vars.lua` and `general.apps.terminal` in `shell.json` to match.
@@ -186,7 +186,7 @@ Fedora (names researched, not tested):
 ```bash
 sudo dnf install foot thunar fuzzel cliphist gammastep trash-cli jetbrains-mono-fonts brightnessctl \
   grim slurp swappy wl-clipboard libnotify python3-gobject jq btop git nautilus ptyxis \
-  xdg-desktop-portal-gtk gnome-keyring
+  xdg-desktop-portal-gtk gnome-keyring papirus-icon-theme
 ```
 
 Install Nix with the Determinate installer. It asks for confirmation and the `sudo` password, keeps everything under `/nix`, supports SELinux on Fedora, and can be removed later with `/nix/nix-installer uninstall`.
@@ -283,7 +283,9 @@ hyprctl reload; hyprctl configerrors
 | Touchpad: 2-finger right click, speed, gestures | `hypr-user.lua`, `hypr-vars.lua` |
 | Drag the gap between windows to resize | `hypr-user.lua` |
 | `Super + Shift + arrows` re-splits two windows so the focused one lands on that side | `hypr-user.lua` |
-| Emergency exit, Mac-style extras | `hypr-user.lua` |
+| Emergency exit, `Super + M` exit, Mac-style extras | `hypr-user.lua`, `hypr-vars.lua` |
+| `Super + Alt + ←→` moves the window to the previous / next workspace | `hypr-vars.lua` |
+| `Super + V` clipboard picker | `hypr-user.lua`, `hypr-vars.lua`, `bin/clipboard` |
 | `Super + J` / `Super + K` switch to the previous / next workspace | `hypr-vars.lua` |
 | Next wallpaper on `Super + W` | `hypr-user.lua`, `bin/wallpaper-next` |
 | Starts polkit agent, fcitx5, NetBird tray at login | `hypr-user.lua` |
@@ -324,7 +326,8 @@ The repo files already set this up:
 | File | Purpose |
 |---|---|
 | `~/.config/fcitx5/profile` | Keyboard `us` + `bamboo`, Bamboo as default |
-| `~/.config/fcitx5/config` | `Super + Space` toggles |
+| `~/.config/fcitx5/config` | `Super + Space` toggles, popup hidden |
+| `hypr-user.lua`, `bin/fcitx5-switch` | Hyprland takes `Super + Space` first and runs the script, which switches and shows an EN/VI notification |
 | `~/.config/environment.d/90-fcitx5.conf` | `XMODIFIERS`, `QT_IM_MODULE`, `SDL_IM_MODULE` = fcitx for every session |
 | `~/.config/autostart/org.fcitx.Fcitx5.desktop` | Starts fcitx5 in GNOME only (`OnlyShowIn=GNOME`). GNOME talks to it through fcitx5's IBus frontend |
 | `hypr-user.lua` | Starts `fcitx5 -d --replace` in Hyprland and sets the same variables |
@@ -383,6 +386,7 @@ Every row here happened on the reference machine.
 | A password prompt never shows up in Hyprland | No polkit agent (`polkit-gnome` is not packaged on Ubuntu 26.04) | `hyprpolkitagent`, started from `hypr-user.lua` |
 | A tray app that starts in GNOME is missing in Hyprland | Hyprland does not read `~/.config/autostart` | Add `hl.exec_cmd("app")` to the `hyprland.start` block in `hypr-user.lua` |
 | `hyprctl dispatch exit` errors | Hyprland 0.57 with a Lua config expects Lua in `dispatch` | `hyprctl dispatch 'hl.dsp.exit()'` |
+| Tray and tray-menu icons show as pink and black squares | The Nix-built shell cannot load the `qtengine` Qt plugin, so the `Papirus-Dark` icon theme in `~/.config/qtengine/config.json` is ignored | `papirus-icon-theme` from Phase 4 and `QS_ICON_THEME` in `hypr-user.lua` |
 | NVIDIA looks awake at 8 W in `nvidia-smi` | `nvidia-smi` wakes the card to read it | Read `power/runtime_status` in sysfs instead |
 
 ## Updating and rolling back

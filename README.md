@@ -131,7 +131,7 @@ If you come from GNOME, three things feel different:
 | Sidebar | `Super + N` | Notifications and quick settings |
 | All panels | `Super + K` | Opens everything at once |
 | Session menu | `Ctrl + Alt + Delete` | Lock, log out, reboot, shut down |
-| Special workspaces | `Super + S` (scratch), `Super + M` (music), `Super + D` (chat), `Super + R` (to-do), `Ctrl + Shift + Escape` (btop) | Pop-up areas that slide over what you are doing and hide with the same key |
+| Special workspaces | `Super + S` (scratch), `Super + D` (chat), `Super + R` (to-do), `Ctrl + Shift + Escape` (btop) | Pop-up areas that slide over what you are doing and hide with the same key |
 
 The full key list is in [SHORTCUTS.md](SHORTCUTS.md). Learn the first table there; the rest can wait.
 
@@ -176,6 +176,7 @@ After editing a Hyprland file, run `hyprctl reload`. A red bar at the top means 
 | `.local/bin/capture` | Screenshot and screen recording for `Super + Shift + S` and `Super + Shift + R` |
 | `.local/bin/notify-action` | Notification with a clickable action (Ubuntu's `notify-send` can't do it with Caelestia) |
 | `.local/bin/wallpaper-next` | Next wallpaper in name order |
+| `.local/bin/fcitx5-switch` | `Super + Space`: English / Vietnamese with an EN/VI notification |
 | `system/etc/tmpfiles.d/nix-unix-chkpwd.conf` | Lets the Nix-built lock screen check passwords |
 | `system/etc/polkit-1/rules.d/50-gsr-kms-server.rules` | Screen recording starts without a password prompt (pinned to one recorder build) |
 

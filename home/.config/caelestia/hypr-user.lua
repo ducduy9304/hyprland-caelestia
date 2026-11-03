@@ -13,6 +13,9 @@ hl.env("XMODIFIERS", "@im=fcitx")
 hl.env("QT_IM_MODULE", "fcitx")
 hl.env("SDL_IM_MODULE", "fcitx")
 
+-- The Nix-built shell can't load the qtengine Qt plugin, so give Quickshell the icon theme directly
+hl.env("QS_ICON_THEME", "Papirus-Dark")
+
 -- BIOS dGPU (G-Sync) mode: every connected screen is on NVIDIA, so point apps at its VA-API and GLX.
 -- Hybrid mode keeps the AMD defaults. ~/.local/bin/caelestia does the same check for nixGL.
 local probe = io.popen([[for s in /sys/class/drm/card*-*/status; do
@@ -53,8 +56,21 @@ hl.device({
 -- Drag the gap between windows to resize them, like GNOME
 hl.config({ general = { resize_on_border = true, extend_border_grab_area = 15 } })
 
+-- New windows always split to the right/bottom instead of following the mouse
+hl.config({ dwindle = { force_split = 2 } })
+
 -- Next wallpaper in ~/Pictures/Wallpapers, in order (SUPER + W no longer opens the browser, see hypr-vars.lua)
 hl.bind("SUPER + W", hl.dsp.exec_cmd(home .. "/.local/bin/wallpaper-next"))
+
+-- English / Vietnamese with an EN/VI notification (fcitx5 never sees SUPER + Space, Hyprland takes it first)
+hl.bind("SUPER + Space", hl.dsp.exec_cmd(home .. "/.local/bin/fcitx5-switch"))
+
+-- Clipboard picker on SUPER + V, SUPER + ALT + V deletes an entry
+hl.bind("SUPER + V", hl.dsp.exec_cmd("pkill fuzzel || " .. home .. "/.local/bin/clipboard"))
+hl.bind("SUPER + ALT + V", hl.dsp.exec_cmd("pkill fuzzel || " .. home .. "/.local/bin/clipboard -d"))
+
+-- SUPER + M quits to the login screen (Caelestia's music workspace key is turned off in hypr-vars.lua)
+hl.bind("SUPER + M", hl.dsp.exit())
 
 -- SUPER + SHIFT + arrow moves the window; with no window on that side it re-splits the pair
 -- so the window lands on that side (left/right pair + down = top/bottom, window at the bottom)

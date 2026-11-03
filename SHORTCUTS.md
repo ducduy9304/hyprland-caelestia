@@ -46,7 +46,8 @@ Every key and gesture on this setup, checked against `hyprctl binds` on the refe
 | `Super + Tab` | Focus the next window | custom |
 | `Super + Minus` / `Super + Equal` | Make the window narrower / wider | |
 | `Super + Shift + Minus` / `Super + Shift + Equal` | Make the window shorter / taller | |
-| `Super + Alt + ←→↑↓` | Same resizing, with arrows | |
+| `Super + Alt + ↑↓` | Same resizing, with arrows | |
+| `Super + Alt + ←→` | Move the window to the previous / next workspace | custom |
 | Drag the gap between two windows | Resize both, like GNOME | custom |
 | `Super + left mouse drag` | Move a window | |
 | `Super + right mouse drag` | Resize a window | |
@@ -80,7 +81,6 @@ These slide over whatever you are doing and hide again with the same key.
 | `Super + S` | General scratch workspace |
 | `Super + Alt + S` | Send the window to the scratch workspace |
 | `Ctrl + Super + Shift + ↓` | Bring the window back out |
-| `Super + M` | Music workspace |
 | `Super + D` | Chat workspace (Discord and similar) |
 | `Super + R` | To-do workspace |
 
@@ -110,6 +110,7 @@ Recordings go to `~/Videos/Recordings`.
 | `Super + Ctrl + Q` | Lock the screen (Mac-style key) | custom |
 | `Super + Shift + L` | Sleep | |
 | `Ctrl + Alt + Delete` | Session menu | |
+| `Super + M` | Quit Hyprland to the login screen. Unsaved work is lost | custom |
 | `Ctrl + Super + Shift + Escape` | **Emergency exit**: quits Hyprland straight to the login screen. Works even when Caelestia is frozen. Unsaved work is lost | custom |
 | `Ctrl + Super + Alt + R` | Restart the Caelestia shell (fixes a frozen bar) | |
 | `Ctrl + Super + Shift + R` | Kill the Caelestia shell | |
@@ -122,7 +123,7 @@ Recordings go to `~/Videos/Recordings`.
 | `Super + V` | Clipboard history |
 | `Super + Alt + V` | Delete an item from clipboard history |
 | `Super + Period` | Emoji picker |
-| `Super + Space` | English / Vietnamese (fcitx5 + Bamboo) |
+| `Super + Space` | English / Vietnamese (fcitx5 + Bamboo), shows an EN/VI notification |
 
 ## Media and hardware keys
 
