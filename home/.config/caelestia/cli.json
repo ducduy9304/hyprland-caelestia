@@ -1,26 +1,27 @@
 {
-    "theme": {
-        "enableGtk": false,
-        "enableChromium": false
-    },
-    "toggles": {
-        "sysmon": {
-            "btop": {
-                "command": [
-                    "foot",
-                    "-a",
-                    "btop",
-                    "-T",
-                    "btop",
-                    "btop"
-                ]
-            }
-        }
-    },
-    "record": {
-        "extraArgs": [
-            "-fallback-cpu-encoding",
-            "yes"
+  "theme": {
+    "enableGtk": false,
+    "enableChromium": false,
+    "enableTerm": false
+  },
+  "toggles": {
+    "sysmon": {
+      "btop": {
+        "command": [
+          "foot",
+          "-a",
+          "btop",
+          "-T",
+          "btop",
+          "btop"
         ]
+      }
     }
+  },
+  "record": {
+    "extraArgs": [
+      "-fallback-cpu-encoding",
+      "yes"
+    ]
+  }
 }

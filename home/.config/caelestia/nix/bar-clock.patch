@@ -1,0 +1,27 @@
+--- a/modules/bar/components/Clock.qml
++++ b/modules/bar/components/Clock.qml
+@@ -12,7 +12,7 @@
+ 
+     readonly property color colour: Colours.palette.m3tertiary
+     readonly property int padding: Config.bar.clock.background ? Tokens.padding.medium : Tokens.padding.extraSmall
+-    readonly property var font: Tokens.font.body.builders.small.scale(1.1)
++    readonly property var font: Tokens.font.body.builders.small.scale(1.7)
+ 
+     function fontFor(text: string, metricWidth: int): font {
+         // We don't count seconds for the max width because it changes too often
+@@ -26,6 +26,15 @@
+     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Config.bar.clock.background ? Colours.tPalette.m3surfaceContainer.a : 0)
+     radius: Tokens.rounding.full
+ 
++    MouseArea {
++        anchors.fill: parent
++        cursorShape: Qt.PointingHandCursor
++        onClicked: {
++            const screenState = ShellState.forActive();
++            screenState.dashboard = !screenState.dashboard;
++        }
++    }
++
+     ColumnLayout {
+         id: layout
+ 

@@ -9,7 +9,7 @@ The reference machine where all of this was built and tested:
 | Distro | Ubuntu 26.04.1 LTS, kernel 7.0, GDM, GNOME 50 |
 | Hardware | Lenovo Legion laptop, AMD Radeon 680M iGPU + NVIDIA RTX 3050 Ti (MUX switch), NVIDIA driver 595.99.02 (open kernel module) |
 | Hyprland | 0.57.0 from `ppa:cppiber/hyprland`, Lua config |
-| Caelestia | shell + CLI from Nix, built from this repo's flake (`home/.config/caelestia/nix`: `caelestia-dots/cli` pinned at `fdb3e47` plus one shell patch), dots `hypr/` folder from `caelestia-dots/caelestia` at `7845d28` (2026-10-31) |
+| Caelestia | shell + CLI from Nix, built from this repo's flake (`home/.config/caelestia/nix`: `caelestia-dots/cli` pinned at `fdb3e47` plus three shell patches), dots `hypr/` folder from `caelestia-dots/caelestia` at `7845d28` (2026-10-31) |
 | Nix | Determinate Nix 3.24.1 (Nix 2.35.3), plus `nixGLIntel` and `nixGLNvidia` from `github:nix-community/nixGL` |
 
 Only Ubuntu 26.04 is tested. Every other distro below is researched but untested, so check package names with the package manager before you run an install line.
@@ -204,7 +204,7 @@ mkdir -p ~/.config/caelestia
 cp <this-repo>/home/.config/caelestia/cli.json ~/.config/caelestia/
 ```
 
-Then install the shell, the CLI and the Mesa wrapper. The shell comes from the flake in `home/.config/caelestia/nix`: upstream `caelestia-dots/cli#with-shell` pinned by `flake.lock`, plus `workspace-attention.patch`, which makes the bar flash a workspace when a launched app only focused a window that was already open there. Nix remembers the path, so keep the clone where it is. The first build downloads Qt and Quickshell and took about 10 minutes on the reference machine.
+Then install the shell, the CLI and the Mesa wrapper. The shell comes from the flake in `home/.config/caelestia/nix`: upstream `caelestia-dots/cli#with-shell` pinned by `flake.lock`, plus three patches: `workspace-attention.patch` makes the bar flash a workspace when a launched app only focused a window that was already open there, and `bar-clock.patch` makes the bar clock bigger and opens the dashboard (calendar, weather, media) when it is clicked, and `bar-app-name.patch` shows the focused app's name under the clock instead of the full window title. Nix remembers the path, so keep the clone where it is. The first build downloads Qt and Quickshell and took about 10 minutes on the reference machine.
 
 ```bash
 nix profile add path:<this-repo>/home/.config/caelestia/nix
@@ -315,7 +315,8 @@ sudo install -m 644 <this-repo>/system/etc/polkit-1/rules.d/50-gsr-kms-server.ru
 | Notification click runs its action, launcher size, weather, no session gif, terminal | `shell.json` |
 | Thinner bar | `shell-tokens.json` |
 | Bar flashes a workspace when a launched app only focused a window already open there | `caelestia/nix/workspace-attention.patch` |
-| GNOME theme left alone; btop toggle uses foot | `cli.json` |
+| Clock in the middle of the bar with the date, focused app's name right under it; bigger digits; click it for the dashboard | `shell.json` (`bar.entries`, `bar.clock.showDate`), `caelestia/nix/bar-clock.patch`, `caelestia/nix/bar-app-name.patch` |
+| GNOME theme left alone; open terminals keep their own palette (Ptyxis: Monokai Dark) when the scheme changes; btop toggle uses foot | `cli.json` |
 
 ### Adapt these values
 
@@ -420,6 +421,6 @@ Before every big update, take a snapshot: `sudo timeshift --create --comments "b
 
 - `sudo apt update && sudo apt upgrade` (not `full-upgrade`). Watch for `hyprland`, `nvidia-*`, `linux-image-*` and `mesa` in the list. Reboot after kernel or NVIDIA updates.
 - After an NVIDIA driver version change, run `install-nixgl-nvidia` before booting in dGPU mode.
-- Update Caelestia's shell and CLI separately: change the `cli` commit in `home/.config/caelestia/nix/flake.nix`, run `nix flake update --flake path:<this-repo>/home/.config/caelestia/nix`, then `nix profile upgrade nix`. If `workspace-attention.patch` no longer applies, fix or drop it. The recorder's store path changes too, so put the new one in the polkit rule (Phase 6). Update the dots by copying a fresh `hypr/` folder (Phase 5). Personal files in `~/.config/caelestia` are never touched.
+- Update Caelestia's shell and CLI separately: change the `cli` commit in `home/.config/caelestia/nix/flake.nix`, run `nix flake update --flake path:<this-repo>/home/.config/caelestia/nix`, then `nix profile upgrade nix`. If a patch in that folder no longer applies, fix or drop it. The recorder's store path changes too, so put the new one in the polkit rule (Phase 6). Update the dots by copying a fresh `hypr/` folder (Phase 5). Personal files in `~/.config/caelestia` are never touched.
 - Roll Hyprland back to Ubuntu's own packages: `sudo ppa-purge ppa:cppiber/hyprland`.
 - Remove everything: pick GNOME at login, `sudo apt remove hyprland xdg-desktop-portal-hyprland hyprlock hypridle`, `/nix/nix-installer uninstall`, and restore `~/.config` from the backup if needed.

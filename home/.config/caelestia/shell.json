@@ -1,46 +1,89 @@
 {
-    "appearance": {
-        "transparency": {
-            "enabled": true,
-            "base": 0.5,
-            "layers": 1
-        }
-    },
-    "dashboard": {
-        "showClockSeconds": false,
-        "showDashboard": true
-    },
-    "general": {
-        "apps": {
-            "terminal": [
-                "ptyxis"
-            ]
-        },
-        "idle": {
-            "timeouts": [
-                {
-                    "timeout": 3600,
-                    "idleAction": [
-                        "systemctl",
-                        "suspend"
-                    ],
-                    "inhibitWhenCharging": true
-                }
-            ]
-        }
-    },
-    "launcher": {
-        "maxShown": 12
-    },
-    "notifs": {
-        "actionOnClick": true
-    },
-    "services": {
-        "sensorUnits": "Celsius",
-        "weatherUnits": "Celsius",
-        "weatherLocation": "10.9289,108.1021"
-    },
-    "paths": {
-        "sessionGif": ""
+  "appearance": {
+    "transparency": {
+      "enabled": true,
+      "base": 0.5,
+      "layers": 1
     }
+  },
+  "dashboard": {
+    "showClockSeconds": false,
+    "showDashboard": true
+  },
+  "general": {
+    "apps": {
+      "terminal": [
+        "ptyxis"
+      ]
+    },
+    "idle": {
+      "timeouts": [
+        {
+          "timeout": 3600,
+          "idleAction": [
+            "systemctl",
+            "suspend"
+          ],
+          "inhibitWhenCharging": true
+        }
+      ]
+    }
+  },
+  "launcher": {
+    "maxShown": 12
+  },
+  "notifs": {
+    "actionOnClick": true
+  },
+  "services": {
+    "sensorUnits": "Celsius",
+    "weatherUnits": "Celsius",
+    "weatherLocation": "10.9289,108.1021"
+  },
+  "paths": {
+    "sessionGif": ""
+  },
+  "bar": {
+    "entries": [
+      {
+        "id": "logo",
+        "enabled": true
+      },
+      {
+        "id": "workspaces",
+        "enabled": true
+      },
+      {
+        "id": "spacer",
+        "enabled": true
+      },
+      {
+        "id": "clock",
+        "enabled": true
+      },
+      {
+        "id": "activeWindow",
+        "enabled": true
+      },
+      {
+        "id": "spacer",
+        "enabled": true
+      },
+      {
+        "id": "tray",
+        "enabled": true
+      },
+      {
+        "id": "statusIcons",
+        "enabled": true
+      },
+      {
+        "id": "power",
+        "enabled": true
+      }
+    ],
+    "clock": {
+      "showDate": true
+    }
+  }
 }
