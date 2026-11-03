@@ -262,7 +262,7 @@ cp -r /tmp/caelestia-dots/hypr/. ~/.config/hypr/
 
 For the exact tested version, run `git -C /tmp/caelestia-dots checkout 7845d28` before copying.
 
-The reference machine uses a different colour scheme from the default. It is stored in `~/.local/state/caelestia`, not in a config file, so set it by hand: `caelestia scheme set -n catppuccin -f mocha -m dark -v tonalspot`.
+The reference machine uses the dynamic scheme, which takes its colours from the wallpaper, so they change with every `Super + W`. It is stored in `~/.local/state/caelestia`, not in a config file, so set it by hand: `caelestia scheme set -n dynamic -m dark -v tonalspot`. `caelestia scheme list` shows the fixed schemes (nord, everforest, gruvbox and others).
 
 From now on, the next Hyprland login starts the shell automatically and the keys change to Caelestia's: `Super + Q` closes windows, `Super + T` is the terminal, a tap on `Super` opens the launcher.
 
