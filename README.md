@@ -62,7 +62,7 @@ The one awkward part: programs built by Nix can't find the system's graphics dri
 |---|---|---|
 | Ubuntu | 26.04.1 LTS, kernel 7.0 | |
 | Hyprland | 0.57.0 | `ppa:cppiber/hyprland` |
-| Caelestia shell + CLI | flake commit `fdb3e47` | `nix profile add github:caelestia-dots/cli#with-shell` |
+| Caelestia shell + CLI | flake commit `fdb3e47` + one patch | `nix profile add path:<repo>/home/.config/caelestia/nix` |
 | Caelestia Hyprland config | commit `7845d28` (2026-10-31) | `hypr/` folder of `caelestia-dots/caelestia` |
 | Nix | Determinate Nix 3.24.1 | install.determinate.systems |
 | GPU | AMD Radeon 680M + RTX 3050 Ti, driver 595.99.02 | |
@@ -111,7 +111,7 @@ If something goes wrong:
 - Take a snapshot before a big `apt upgrade`: `sudo timeshift --create --comments "before upgrade"`.
 - Use `apt upgrade`, not `full-upgrade`, and look at the list. The packages that matter here are `hyprland`, `nvidia-*`, `linux-image-*` and `mesa`.
 - Reboot after a kernel or NVIDIA update. If the NVIDIA driver version changed, run `install-nixgl-nvidia` before booting in dGPU mode.
-- The shell updates separately with `nix profile upgrade with-shell`.
+- The shell updates separately: bump the commit in `home/.config/caelestia/nix/flake.nix`, then `nix flake update --flake path:<repo>/home/.config/caelestia/nix` and `nix profile upgrade nix`.
 
 ## Using Caelestia
 
@@ -168,9 +168,11 @@ After editing a Hyprland file, run `hyprctl reload`. A red bar at the top means 
 | `.config/caelestia/hypr-vars.lua` | Overrides for Caelestia's variables: apps, cursor, swapped keys, gesture fingers |
 | `.config/caelestia/shell.json`, `shell-tokens.json` | Shell settings and a thinner bar |
 | `.config/caelestia/cli.json` | Keeps Caelestia out of GNOME's theme, fixes the btop toggle |
+| `.config/caelestia/nix/` | Nix flake that builds the shell and CLI at a pinned commit, plus a patch that flashes a workspace when a launched app was already open there |
 | `.config/fcitx5/` | English + Vietnamese (Bamboo), `Super + Space` to switch |
 | `.config/environment.d/90-fcitx5.conf` | Input method variables for every session |
 | `.config/autostart/org.fcitx.Fcitx5.desktop` | Starts fcitx5 in the GNOME session |
+| `.local/share/applications/network.cycles.wdisplays.desktop` | Names the monitor settings app "wdisplays" so the launcher finds it |
 | `.local/bin/caelestia` | Runs the Nix-built shell through nixGL (Mesa or NVIDIA) |
 | `.local/bin/install-nixgl-nvidia` | Builds nixGLNvidia for the running driver. Run after each NVIDIA driver update |
 | `.local/bin/capture` | Screenshot and screen recording for `Super + Shift + S` and `Super + Shift + R` |

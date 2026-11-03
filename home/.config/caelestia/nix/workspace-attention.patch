@@ -1,0 +1,103 @@
+--- a/modules/launcher/services/Apps.qml	2026-11-01 22:25:25.400510290 +0700
++++ b/modules/launcher/services/Apps.qml	2026-11-01 22:25:25.444707145 +0700
+@@ -3,6 +3,7 @@
+ import Quickshell
+ import Caelestia.Config
+ import Caelestia.Models
++import qs.services
+ import qs.utils
+ 
+ Searcher {
+@@ -10,6 +11,7 @@
+ 
+     function launch(entry: DesktopEntry): void {
+         appDb.incrementFrequency(entry.id);
++        Hypr.watchLaunch([entry.startupClass, entry.id]);
+ 
+         if (entry.runInTerminal)
+             Quickshell.execDetached({
+--- a/services/Hypr.qml	2026-11-01 22:25:25.413594920 +0700
++++ b/services/Hypr.qml	2026-11-01 22:25:25.444771837 +0700
+@@ -40,6 +40,47 @@
+ 
+     signal configReloaded
+ 
++    // Workspace to flash when a launched app only re-activated a window there instead of opening one
++    property int attentionWs: 0
++    property list<string> launchAppIds: []
++    property var launchKnownWindows: []
++
++    function watchLaunch(appIds: list<string>): void {
++        launchAppIds = appIds.filter(Boolean).map(id => id.toLowerCase());
++        launchKnownWindows = toplevels.values.map(t => t.address);
++        launchCheck.restart();
++    }
++
++    function checkLaunch(): void {
++        if (toplevels.values.some(t => !launchKnownWindows.includes(t.address)))
++            return; // A new window opened, so the app is not single-instance
++        const existing = toplevels.values.find(t => launchAppIds.includes((t.lastIpcObject?.class ?? "").toLowerCase()));
++        const ws = existing?.workspace?.id ?? 0;
++        if (ws > 0 && ws !== activeWsId) {
++            attentionWs = ws;
++            attentionClear.restart();
++        }
++    }
++
++    onActiveWsIdChanged: {
++        if (activeWsId === attentionWs)
++            attentionWs = 0;
++    }
++
++    Timer {
++        id: launchCheck
++
++        interval: 2000
++        onTriggered: root.checkLaunch()
++    }
++
++    Timer {
++        id: attentionClear
++
++        interval: 6000
++        onTriggered: root.attentionWs = 0
++    }
++
+     function dispatch(request: string): void {
+         Hyprland.dispatch(request);
+     }
+--- a/modules/bar/components/workspaces/Workspace.qml	2026-11-01 22:25:25.426856846 +0700
++++ b/modules/bar/components/workspaces/Workspace.qml	2026-11-01 22:25:25.444945396 +0700
+@@ -31,6 +31,8 @@
+     readonly property bool isOccupied: toplevels.length > 0
+     readonly property bool hasWindows: isOccupied && showWindows && Config.bar.workspaces.maxWindowIcons > 0
+     readonly property bool focused: activeWsId === ws
++    readonly property bool needsAttention: Hypr.attentionWs === ws
++    property bool attentionBlink: false
+     readonly property list<int> focusedShapeList: [MaterialShape.Slanted, MaterialShape.Oval, MaterialShape.Pill, MaterialShape.Triangle, MaterialShape.Arrow, MaterialShape.Diamond, MaterialShape.Pentagon, MaterialShape.Gem, MaterialShape.VerySunny, MaterialShape.Sunny, MaterialShape.Cookie4Sided, MaterialShape.Cookie6Sided, MaterialShape.Cookie7Sided, MaterialShape.Cookie9Sided, MaterialShape.Cookie12Sided, MaterialShape.Clover4Leaf, MaterialShape.SoftBurst, MaterialShape.Ghostish]
+ 
+     property color offMonitorColour: Colours.palette.m3outlineVariant
+@@ -41,6 +43,8 @@
+         return !!(mon && mon !== monitor);
+     }
+     readonly property color fgColour: {
++        if (needsAttention && attentionBlink)
++            return Colours.palette.m3error;
+         if (onOtherMonitor)
+             return offMonitorColour;
+         if (focused || isOccupied || Config.bar.workspaces.occupiedBg)
+@@ -66,6 +70,14 @@
+     opacity: LazyListView.removing || LazyListView.adding ? 0 : 1
+ 
+     onFocusedChanged: updateShape()
++    onNeedsAttentionChanged: attentionBlink = needsAttention
++
++    Timer {
++        running: root.needsAttention
++        repeat: true
++        interval: 400
++        onTriggered: root.attentionBlink = !root.attentionBlink
++    }
+     Component.onCompleted: updateShape()
+ 
+     Behavior on LazyListView.visibleHeight {

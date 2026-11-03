@@ -9,7 +9,7 @@ The reference machine where all of this was built and tested:
 | Distro | Ubuntu 26.04.1 LTS, kernel 7.0, GDM, GNOME 50 |
 | Hardware | Lenovo Legion laptop, AMD Radeon 680M iGPU + NVIDIA RTX 3050 Ti (MUX switch), NVIDIA driver 595.99.02 (open kernel module) |
 | Hyprland | 0.57.0 from `ppa:cppiber/hyprland`, Lua config |
-| Caelestia | shell + CLI from Nix (`github:caelestia-dots/cli#with-shell`, locked at `fdb3e47`), dots `hypr/` folder from `caelestia-dots/caelestia` at `7845d28` (2026-10-31) |
+| Caelestia | shell + CLI from Nix, built from this repo's flake (`home/.config/caelestia/nix`: `caelestia-dots/cli` pinned at `fdb3e47` plus one shell patch), dots `hypr/` folder from `caelestia-dots/caelestia` at `7845d28` (2026-10-31) |
 | Nix | Determinate Nix 3.24.1 (Nix 2.35.3), plus `nixGLIntel` and `nixGLNvidia` from `github:nix-community/nixGL` |
 
 Only Ubuntu 26.04 is tested. Every other distro below is researched but untested, so check package names with the package manager before you run an install line.
@@ -176,8 +176,10 @@ Ubuntu 26.04 (the exact list used on the reference machine):
 ```bash
 sudo apt install -y foot thunar fuzzel cliphist gammastep trash-cli fonts-jetbrains-mono brightnessctl \
   grim slurp swappy wl-clipboard libnotify-bin python3-gi jq btop git nautilus ptyxis \
-  xdg-desktop-portal-gtk gnome-keyring papirus-icon-theme
+  xdg-desktop-portal-gtk gnome-keyring papirus-icon-theme wdisplays
 ```
+
+The configs also call three apps that come from their vendors' own apt repos, not Ubuntu's: `brave-browser` (brave.com/linux), `code` (VS Code, packages.microsoft.com) and `netbird-ui` (netbird.io). Install the ones the person uses and adapt the rest (see "Adapt these values").
 
 Ubuntu 24.04: drop `swappy` and `ptyxis` from that line. Install swappy with `nix profile add nixpkgs#swappy` after Nix is in, and keep `gnome-terminal` (or install Ptyxis from Flathub as `app.devsuite.Ptyxis`), then change `terminal` in `hypr-vars.lua` and `general.apps.terminal` in `shell.json` to match.
 
@@ -186,7 +188,7 @@ Fedora (names researched, not tested):
 ```bash
 sudo dnf install foot thunar fuzzel cliphist gammastep trash-cli jetbrains-mono-fonts brightnessctl \
   grim slurp swappy wl-clipboard libnotify python3-gobject jq btop git nautilus ptyxis \
-  xdg-desktop-portal-gtk gnome-keyring papirus-icon-theme
+  xdg-desktop-portal-gtk gnome-keyring papirus-icon-theme wdisplays
 ```
 
 Install Nix with the Determinate installer. It asks for confirmation and the `sudo` password, keeps everything under `/nix`, supports SELinux on Fedora, and can be removed later with `/nix/nix-installer uninstall`.
@@ -202,10 +204,10 @@ mkdir -p ~/.config/caelestia
 cp <this-repo>/home/.config/caelestia/cli.json ~/.config/caelestia/
 ```
 
-Then install the shell, the CLI and the Mesa wrapper. The first build downloads Qt and Quickshell and took about 10 minutes on the reference machine.
+Then install the shell, the CLI and the Mesa wrapper. The shell comes from the flake in `home/.config/caelestia/nix`: upstream `caelestia-dots/cli#with-shell` pinned by `flake.lock`, plus `workspace-attention.patch`, which makes the bar flash a workspace when a launched app only focused a window that was already open there. Nix remembers the path, so keep the clone where it is. The first build downloads Qt and Quickshell and took about 10 minutes on the reference machine.
 
 ```bash
-nix profile add github:caelestia-dots/cli#with-shell
+nix profile add path:<this-repo>/home/.config/caelestia/nix
 nix profile add github:nix-community/nixGL#nixGLIntel
 ```
 
@@ -269,8 +271,23 @@ Copy everything, then adapt the values in the next table.
 ```bash
 cp -r <this-repo>/home/.config/. ~/.config/
 install -m 755 <this-repo>/home/.local/bin/* ~/.local/bin/     # route B: skip caelestia and install-nixgl-nvidia
+cp -r <this-repo>/home/.local/share/. ~/.local/share/
 mkdir -p ~/Pictures/Wallpapers ~/Pictures/Screenshots
 hyprctl reload; hyprctl configerrors
+```
+
+The reference machine links the files instead of copying them, so edits land in the repo and can be committed. To do the same, use an absolute repo path (fcitx5 rewrites its `profile` on exit, which turns that one link back into a plain file; that is harmless):
+
+```bash
+cp -rs --remove-destination /abs/path/to/repo/home/.config/. ~/.config/
+cp -rs --remove-destination /abs/path/to/repo/home/.local/bin/. ~/.local/bin/
+cp -rs --remove-destination /abs/path/to/repo/home/.local/share/. ~/.local/share/
+```
+
+Route A only: let screen recording start without a password prompt. The rule allows one exact `gsr-kms-server` store path, which comes from the pinned flake, so it matches as long as `flake.lock` is unchanged:
+
+```bash
+sudo install -m 644 <this-repo>/system/etc/polkit-1/rules.d/50-gsr-kms-server.rules /etc/polkit-1/rules.d/
 ```
 
 | What it does | Lives in |
@@ -289,10 +306,11 @@ hyprctl reload; hyprctl configerrors
 | `Super + J` / `Super + K` switch to the previous / next workspace | `hypr-vars.lua` |
 | Next wallpaper on `Super + W` | `hypr-user.lua`, `bin/wallpaper-next` |
 | Starts polkit agent, fcitx5, NetBird tray at login | `hypr-user.lua` |
-| Monitor resolution, refresh rate and position via nwg-displays 0.5.0 (first version with Lua output; install from GitHub with `nix profile add --impure --expr` overriding `nwg-displays` src, using Caelestia's locked nixpkgs to skip a big download). Loads `~/.config/hypr/monitors.lua` | `hypr-user.lua`, `share/applications/nwg-displays.desktop` |
+| Monitor resolution, refresh rate and position with wdisplays (shows up as "wdisplays" in the launcher). It only changes the layout until logout; to keep one, write `hl.monitor({ output = "desc:...", mode = "1920x1080@165", position = "0x0", scale = 1 })` lines into `~/.config/hypr/monitors.lua` (values from `hyprctl monitors`), which `hypr-user.lua` loads | `hypr-user.lua`, `share/applications/network.cycles.wdisplays.desktop` |
 | Default apps, cursor, disabled default binds | `hypr-vars.lua` |
 | Notification click runs its action, launcher size, weather, no session gif, terminal | `shell.json` |
 | Thinner bar | `shell-tokens.json` |
+| Bar flashes a workspace when a launched app only focused a window already open there | `caelestia/nix/workspace-attention.patch` |
 | GNOME theme left alone; btop toggle uses foot | `cli.json` |
 
 ### Adapt these values
@@ -395,6 +413,6 @@ Before every big update, take a snapshot: `sudo timeshift --create --comments "b
 
 - `sudo apt update && sudo apt upgrade` (not `full-upgrade`). Watch for `hyprland`, `nvidia-*`, `linux-image-*` and `mesa` in the list. Reboot after kernel or NVIDIA updates.
 - After an NVIDIA driver version change, run `install-nixgl-nvidia` before booting in dGPU mode.
-- Update Caelestia's shell and CLI separately: `nix profile upgrade with-shell`. Update the dots by copying a fresh `hypr/` folder (Phase 5). Personal files in `~/.config/caelestia` are never touched.
+- Update Caelestia's shell and CLI separately: change the `cli` commit in `home/.config/caelestia/nix/flake.nix`, run `nix flake update --flake path:<this-repo>/home/.config/caelestia/nix`, then `nix profile upgrade nix`. If `workspace-attention.patch` no longer applies, fix or drop it. The recorder's store path changes too, so put the new one in the polkit rule (Phase 6). Update the dots by copying a fresh `hypr/` folder (Phase 5). Personal files in `~/.config/caelestia` are never touched.
 - Roll Hyprland back to Ubuntu's own packages: `sudo ppa-purge ppa:cppiber/hyprland`.
 - Remove everything: pick GNOME at login, `sudo apt remove hyprland xdg-desktop-portal-hyprland hyprlock hypridle`, `/nix/nix-installer uninstall`, and restore `~/.config` from the backup if needed.

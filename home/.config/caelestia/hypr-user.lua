@@ -152,7 +152,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("netbird-ui")
 end)
 
--- Monitor layout saved by nwg-displays (~/.config/hypr/monitors.lua)
+-- Saved monitor layout (~/.config/hypr/monitors.lua, hl.monitor lines). wdisplays only changes it until logout
 pcall(require, "monitors")
 
 -- label_defect inspection app (uv run app/label_check_app.py) always opens on the MSI screen
