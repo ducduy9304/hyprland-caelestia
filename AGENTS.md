@@ -204,7 +204,7 @@ mkdir -p ~/.config/caelestia
 cp <this-repo>/home/.config/caelestia/cli.json ~/.config/caelestia/
 ```
 
-Then install the shell, the CLI and the Mesa wrapper. The shell comes from the flake in `home/.config/caelestia/nix`: upstream `caelestia-dots/cli#with-shell` pinned by `flake.lock`, plus three patches: `workspace-attention.patch` makes the bar flash a workspace when a launched app only focused a window that was already open there, and `bar-clock.patch` turns the bar clock into a small analog face under the date and, when it is clicked, opens a small popout beside the bar with a big analog clock and this month's calendar (reusing the dashboard's calendar), and `bar-app-name.patch` shows the focused app's name under the clock instead of the full window title. Nix remembers the path, so keep the clone where it is. The first build downloads Qt and Quickshell and took about 10 minutes on the reference machine.
+Then install the shell, the CLI and the Mesa wrapper. The shell comes from the flake in `home/.config/caelestia/nix`: upstream `caelestia-dots/cli#with-shell` pinned by `flake.lock`, plus four patches. `workspace-attention.patch` makes the bar flash a workspace when a launched app only focused a window that was already open there. `bar-clock.patch` turns the bar clock into a small analog face under the date and, when it is clicked, opens a small popout beside the bar with a big analog clock and this month's calendar (reusing the dashboard's calendar). `bar-app-name.patch` shows the focused app's name under the clock instead of the full window title. `notif-icon.patch` makes notifications whose icon is a `file://` URL or a name missing from the icon theme (Claude desktop, for one) show the app's icon instead of a pink and black square. Nix remembers the path, so keep the clone where it is. The first build downloads Qt and Quickshell and took about 10 minutes on the reference machine.
 
 ```bash
 nix profile add path:<this-repo>/home/.config/caelestia/nix
@@ -316,6 +316,7 @@ sudo install -m 644 <this-repo>/system/etc/polkit-1/rules.d/50-gsr-kms-server.ru
 | Thinner bar | `shell-tokens.json` |
 | Bar flashes a workspace when a launched app only focused a window already open there | `caelestia/nix/workspace-attention.patch` |
 | Clock in the middle of the bar with weekday, day and month, focused app's name right under it; analog face instead of digits; click it for a big analog clock and calendar popout | `shell.json` (`bar.entries`, `bar.clock.showDate`, `bar.clock.showIcon`), `caelestia/nix/bar-clock.patch`, `caelestia/nix/bar-app-name.patch` |
+| Notifications show the app's icon when the app sends a `file://` URL or an icon name the theme lacks | `caelestia/nix/notif-icon.patch` |
 | GNOME theme left alone; open terminals keep their own palette (Ptyxis: Monokai Dark) when the scheme changes; btop toggle uses foot | `cli.json` |
 
 ### Adapt these values
@@ -409,6 +410,7 @@ Every row here happened on the reference machine.
 | `~/.local/bin` appears dozens of times in PATH | Every `hyprctl reload` re-ran the PATH line | Fixed in `hypr-user.lua`: it only prepends when missing |
 | No gear on the login screen | GDM autologin is on | Phase 1 |
 | A password prompt never shows up in Hyprland | No polkit agent (`polkit-gnome` is not packaged on Ubuntu 26.04) | `hyprpolkitagent`, started from `hypr-user.lua` |
+| A notification shows a pink and black square instead of the app's icon | The shell only looked the icon up by name in the theme, so `file://` URLs and names like `com.anthropic.Claude` failed | `notif-icon.patch` |
 | A tray app that starts in GNOME is missing in Hyprland | Hyprland does not read `~/.config/autostart` | Add `hl.exec_cmd("app")` to the `hyprland.start` block in `hypr-user.lua` |
 | `hyprctl dispatch exit` errors | Hyprland 0.57 with a Lua config expects Lua in `dispatch` | `hyprctl dispatch 'hl.dsp.exit()'` |
 | Tray and tray-menu icons show as pink and black squares | The Nix-built shell cannot load the `qtengine` Qt plugin, so the `Papirus-Dark` icon theme in `~/.config/qtengine/config.json` is ignored | `papirus-icon-theme` from Phase 4 and `QS_ICON_THEME` in `hypr-user.lua` |

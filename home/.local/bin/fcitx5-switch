@@ -3,8 +3,9 @@ set -euo pipefail
 
 LAYOUTS=(keyboard-us bamboo)
 declare -A LAYOUT_LABEL=([keyboard-us]="EN" [bamboo]="VI")
-ICON_BASE="/usr/share/icons/Papirus-Dark/24x24/panel"
-declare -A LAYOUT_ICON=([keyboard-us]="$ICON_BASE/indicator-keyboard-En.svg" [bamboo]="$ICON_BASE/indicator-keyboard-Vi.svg")
+# Theme icon names like the tray uses (fcitx5 shows input-keyboard-symbolic for EN,
+# which is barely visible on the notification badge, so EN gets the full-colour one)
+declare -A LAYOUT_ICON=([keyboard-us]="input-keyboard" [bamboo]="fcitx_bamboo")
 STATE="$HOME/.cache/fcitx5_keyboard_state"
 DOUBLE_TAP_MS="${DOUBLE_TAP_MS:-300}"
 
@@ -42,7 +43,7 @@ fi
 if [[ -n "$target" ]]; then
     fcitx5-remote -s "$target"
     label="${LAYOUT_LABEL[$target]:-$target}"
-    icon="${LAYOUT_ICON[$target]:-/usr/share/icons/Adwaita/scalable/devices/input-keyboard.svg}"
+    icon="${LAYOUT_ICON[$target]:-input-keyboard}"
     command -v notify-send >/dev/null 2>&1 && notify-send -e -i "$icon" -a fcitx5 -t 700 "$label" &
 fi
 printf '%s %s\n' "$now" "$cur" > "$STATE"

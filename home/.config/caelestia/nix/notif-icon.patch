@@ -1,0 +1,22 @@
+diff -ruN a/modules/notifications/Notification.qml b/modules/notifications/Notification.qml
+--- a/modules/notifications/Notification.qml
++++ b/modules/notifications/Notification.qml
+@@ -165,7 +165,17 @@
+ 
+                         sourceComponent: ColouredIcon {
+                             anchors.fill: parent
+-                            source: Quickshell.iconPath(root.modelData.appIcon)
++                            source: {
++                                // file:// URLs load as they are; a name the theme lacks falls back to its app's icon
++                                const icon = root.modelData.appIcon;
++                                if (icon.startsWith("file://"))
++                                    return icon;
++                                const themed = icon.startsWith("/") ? Quickshell.iconPath(icon) : Quickshell.iconPath(icon, true);
++                                if (themed)
++                                    return themed;
++                                const entry = DesktopEntries.heuristicLookup(icon) ?? DesktopEntries.heuristicLookup(root.modelData.appName);
++                                return Quickshell.iconPath(entry?.icon ?? "", "dialog-information");
++                            }
+                             colour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+                             layer.enabled: root.modelData.appIcon.endsWith("symbolic")
+                         }
