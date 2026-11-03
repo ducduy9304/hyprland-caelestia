@@ -262,6 +262,8 @@ cp -r /tmp/caelestia-dots/hypr/. ~/.config/hypr/
 
 For the exact tested version, run `git -C /tmp/caelestia-dots checkout 7845d28` before copying.
 
+The reference machine uses a different colour scheme from the default. It is stored in `~/.local/state/caelestia`, not in a config file, so set it by hand: `caelestia scheme set -n catppuccin -f mocha -m dark -v tonalspot`.
+
 From now on, the next Hyprland login starts the shell automatically and the keys change to Caelestia's: `Super + Q` closes windows, `Super + T` is the terminal, a tap on `Super` opens the launcher.
 
 ## Phase 6: apply this repo's configs
@@ -283,6 +285,8 @@ cp -rs --remove-destination /abs/path/to/repo/home/.config/. ~/.config/
 cp -rs --remove-destination /abs/path/to/repo/home/.local/bin/. ~/.local/bin/
 cp -rs --remove-destination /abs/path/to/repo/home/.local/share/. ~/.local/share/
 ```
+
+Two things are per machine and stay out of the repo: `~/.config/hypr/monitors.lua` (saved monitor layout, see the wdisplays row below) and the images in `~/Pictures/Wallpapers`. On a reinstall of the same machine, copy them over from the backup.
 
 Route A only: let screen recording start without a password prompt. The rule allows one exact `gsr-kms-server` store path, which comes from the pinned flake, so it matches as long as `flake.lock` is unchanged:
 
@@ -325,6 +329,7 @@ sudo install -m 644 <this-repo>/system/etc/polkit-1/rules.d/50-gsr-kms-server.ru
 | `general.apps.terminal` | `shell.json` | Same terminal as `hypr-vars.lua` |
 | `services.weatherLocation` (`"10.9289,108.1021"`, Phan Thiết) | `shell.json` | The person's city as `"lat,lon"`, or delete the key to use IP location |
 | `kbBrowser = {}` | `hypr-vars.lua` | Turns off `Super + W` for the browser because the wallpaper script uses it. Remove both if the person prefers the browser key |
+| `hl.window_rule` for "AITS ROBOT - label inspection" | `hypr-user.lua` | Personal app pinned to the MSI monitor. Delete it on other machines |
 | `monitors/` per-screen overrides | not copied | Create `~/.config/caelestia/monitors/<name>/shell.json` only if needed (`hyprctl monitors -j \| jq -r '.[].name'`) |
 
 ## Phase 7: Vietnamese input with fcitx5
@@ -345,6 +350,7 @@ The repo files already set this up:
 |---|---|
 | `~/.config/fcitx5/profile` | Keyboard `us` + `bamboo`, Bamboo as default |
 | `~/.config/fcitx5/config` | `Super + Space` toggles, popup hidden |
+| `~/.config/fcitx5/conf/bamboo.conf` | Bamboo settings: Telex, spell check off, macros on, free marking. fcitx5 rewrites this file and `profile` when settings change, so after changing them in `fcitx5-configtool`, copy both back into the repo |
 | `hypr-user.lua`, `bin/fcitx5-switch` | Hyprland takes `Super + Space` first and runs the script, which switches and shows an EN/VI notification |
 | `~/.config/environment.d/90-fcitx5.conf` | `XMODIFIERS`, `QT_IM_MODULE`, `SDL_IM_MODULE` = fcitx for every session |
 | `~/.config/autostart/org.fcitx.Fcitx5.desktop` | Starts fcitx5 in GNOME only (`OnlyShowIn=GNOME`). GNOME talks to it through fcitx5's IBus frontend |
@@ -405,6 +411,7 @@ Every row here happened on the reference machine.
 | A tray app that starts in GNOME is missing in Hyprland | Hyprland does not read `~/.config/autostart` | Add `hl.exec_cmd("app")` to the `hyprland.start` block in `hypr-user.lua` |
 | `hyprctl dispatch exit` errors | Hyprland 0.57 with a Lua config expects Lua in `dispatch` | `hyprctl dispatch 'hl.dsp.exit()'` |
 | Tray and tray-menu icons show as pink and black squares | The Nix-built shell cannot load the `qtengine` Qt plugin, so the `Papirus-Dark` icon theme in `~/.config/qtengine/config.json` is ignored | `papirus-icon-theme` from Phase 4 and `QS_ICON_THEME` in `hypr-user.lua` |
+| After an hour idle the laptop does not go to sleep | The idle action was `systemctl suspend-then-hibernate`, but hibernation needs swap at least the size of RAM plus a `resume=` kernel parameter. The reference machine has a 4 GB swap file and no `resume=`, so `busctl call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager CanSuspendThenHibernate` says `no` and nothing happens | `shell.json` now runs `systemctl suspend` |
 | NVIDIA looks awake at 8 W in `nvidia-smi` | `nvidia-smi` wakes the card to read it | Read `power/runtime_status` in sysfs instead |
 
 ## Updating and rolling back
