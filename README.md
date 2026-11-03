@@ -168,7 +168,7 @@ After editing a Hyprland file, run `hyprctl reload`. A red bar at the top means 
 | `.config/caelestia/hypr-vars.lua` | Overrides for Caelestia's variables: apps, cursor, swapped keys, gesture fingers |
 | `.config/caelestia/shell.json`, `shell-tokens.json` | Shell settings and a thinner bar |
 | `.config/caelestia/cli.json` | Keeps Caelestia out of GNOME's theme and terminal colours, fixes the btop toggle |
-| `.config/caelestia/nix/` | Nix flake that builds the shell and CLI at a pinned commit, plus patches that flash a workspace when a launched app was already open there make the bar clock bigger and clickable, and show the app name instead of the window title |
+| `.config/caelestia/nix/` | Nix flake that builds the shell and CLI at a pinned commit, plus patches that flash a workspace when a launched app was already open there, turn the bar clock into an analog face with a clock and calendar popout on click, and show the app name instead of the window title |
 | `.config/fcitx5/` | English + Vietnamese (Bamboo), `Super + Space` to switch |
 | `.config/environment.d/90-fcitx5.conf` | Input method variables for every session |
 | `.config/autostart/org.fcitx.Fcitx5.desktop` | Starts fcitx5 in the GNOME session |

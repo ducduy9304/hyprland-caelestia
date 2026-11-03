@@ -1,15 +1,166 @@
+diff -ruN a/components/AnalogClock.qml b/components/AnalogClock.qml
+--- a/components/AnalogClock.qml
++++ b/components/AnalogClock.qml
+@@ -0,0 +1,126 @@
++import QtQuick
++import Caelestia.Config
++import qs.components
++import qs.services
++
++// Analog face drawn with rotated rectangles, so it stays cheap to redraw every second
++Item {
++    id: root
++
++    property real size: 24
++    property color faceColour: "transparent"
++    property color rimColour: handColour
++    property color tickColour: handColour
++    property color handColour
++    property color secondColour: handColour
++    property color numberColour: handColour
++    property bool showSeconds
++    property bool showTicks: size >= 64
++    property bool showNumbers
++    readonly property real rimWidth: faceColour.a > 0 ? 0 : Math.max(1.5, size * 0.07)
++
++    implicitWidth: size
++    implicitHeight: size
++
++    component Hand: Rectangle {
++        id: hand
++
++        property real length
++        property real angle
++
++        x: root.size / 2 - width / 2
++        y: root.size / 2 - length
++        height: length
++        radius: width / 2
++        antialiasing: true
++
++        transform: Rotation {
++            origin.x: hand.width / 2
++            origin.y: hand.length
++            angle: hand.angle
++        }
++    }
++
++    Rectangle {
++        anchors.fill: parent
++        radius: width / 2
++        color: root.faceColour
++        border.color: root.rimColour
++        border.width: root.rimWidth
++        antialiasing: true
++    }
++
++    Repeater {
++        model: root.showTicks ? 12 : 0
++
++        Rectangle {
++            id: tick
++
++            required property int index
++            readonly property real inset: root.rimWidth > 0 ? root.rimWidth + 1.5 : root.size * 0.06
++
++            visible: root.size >= 64 || index % 3 === 0
++            x: root.size / 2 - width / 2
++            y: inset
++            width: Math.max(1.5, index % 3 === 0 ? root.size * 0.03 : root.size * 0.015)
++            height: Math.max(2, (index % 3 === 0 && !root.showNumbers ? 0.09 : 0.05) * root.size)
++            radius: width / 2
++            color: root.tickColour
++            antialiasing: true
++
++            transform: Rotation {
++                origin.x: tick.width / 2
++                origin.y: root.size / 2 - tick.inset
++                angle: tick.index * 30
++            }
++        }
++    }
++
++    Repeater {
++        model: root.showNumbers ? 12 : 0
++
++        StyledText {
++            id: number
++
++            required property int index
++            readonly property real angle: (index + 1) * Math.PI / 6
++            readonly property real radius: root.size * 0.33
++
++            x: root.size / 2 + radius * Math.sin(angle) - width / 2
++            y: root.size / 2 - radius * Math.cos(angle) - height / 2
++            text: index + 1
++            color: root.numberColour
++            font: Tokens.font.clock.size(root.size * 0.07).weight(Font.DemiBold).build()
++        }
++    }
++
++    Hand {
++        width: Math.max(1.5, root.size * 0.05)
++        length: root.size * (root.showNumbers ? 0.22 : 0.26)
++        angle: (Time.hours % 12) * 30 + Time.minutes / 2
++        color: root.handColour
++    }
++
++    Hand {
++        width: Math.max(1.2, root.size * 0.035)
++        length: root.size * 0.38
++        angle: Time.minutes * 6 + (root.showSeconds ? Time.seconds / 10 : 0)
++        color: root.handColour
++    }
++
++    Hand {
++        visible: root.showSeconds
++        width: Math.max(1, root.size * 0.012)
++        length: root.size * 0.42
++        angle: Time.seconds * 6
++        color: root.secondColour
++    }
++
++    Rectangle {
++        anchors.centerIn: parent
++        width: Math.max(2.5, root.size * 0.07)
++        height: width
++        radius: width / 2
++        color: root.showSeconds ? root.secondColour : root.handColour
++    }
++}
+diff -ruN a/modules/bar/Bar.qml b/modules/bar/Bar.qml
+--- a/modules/bar/Bar.qml
++++ b/modules/bar/Bar.qml
+@@ -160,6 +160,7 @@
+                 delegate: EntryWrapper {
+                     Clock {
+                         objectName: "taskbarClock"
++                        bar: root
+                     }
+                 }
+             }
+diff -ruN a/modules/bar/components/Clock.qml b/modules/bar/components/Clock.qml
 --- a/modules/bar/components/Clock.qml
 +++ b/modules/bar/components/Clock.qml
-@@ -12,7 +12,7 @@
+@@ -10,15 +10,10 @@
+ StyledRect {
+     id: root
  
++    required property var bar
      readonly property color colour: Colours.palette.m3tertiary
      readonly property int padding: Config.bar.clock.background ? Tokens.padding.medium : Tokens.padding.extraSmall
 -    readonly property var font: Tokens.font.body.builders.small.scale(1.1)
+-
+-    function fontFor(text: string, metricWidth: int): font {
+-        // We don't count seconds for the max width because it changes too often
+-        const scale = text === "11" ? 1.15 : Math.min(1.05, Math.max(hourMetrics.width, minMetrics.width) / metricWidth);
+-        return root.font.width(scale * 100).letterSpacing(scale).build();
+-    }
 +    readonly property var font: Tokens.font.body.builders.small.scale(1.7)
  
-     function fontFor(text: string, metricWidth: int): font {
-         // We don't count seconds for the max width because it changes too often
-@@ -26,6 +26,15 @@
+     implicitWidth: Tokens.sizes.bar.innerWidth
+     implicitHeight: layout.implicitHeight + root.padding * 2
+@@ -26,6 +21,22 @@
      color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Config.bar.clock.background ? Colours.tPalette.m3surfaceContainer.a : 0)
      radius: Tokens.rounding.full
  
@@ -17,11 +168,170 @@
 +        anchors.fill: parent
 +        cursorShape: Qt.PointingHandCursor
 +        onClicked: {
-+            const screenState = ShellState.forActive();
-+            screenState.dashboard = !screenState.dashboard;
++            const popouts = root.bar.popouts;
++            if (popouts.hasCurrent && popouts.currentName === "clock") {
++                popouts.hasCurrent = false;
++            } else {
++                ShellState.forActive().dashboardDate = new Date();
++                popouts.currentName = "clock";
++                popouts.currentCenter = root.mapToItem(root.bar, 0, root.implicitHeight / 2).y;
++                popouts.hasCurrent = true;
++            }
 +        }
 +    }
 +
      ColumnLayout {
          id: layout
  
+@@ -67,6 +78,13 @@
+                     color: root.colour
+                 }
+ 
++                StyledText {
++                    Layout.alignment: Qt.AlignHCenter
++                    text: Time.format("MMM")
++                    font: Tokens.font.body.builders.small.scale(0.9).build()
++                    color: root.colour
++                }
++
+                 StyledRect {
+                     Layout.fillWidth: true
+                     Layout.leftMargin: -Tokens.padding.extraSmall
+@@ -79,68 +97,12 @@
+             }
+         }
+ 
+-        StyledText {
+-            Layout.alignment: Qt.AlignHCenter
+-            text: Time.hourStr
+-            font: root.fontFor(text, hourMetrics.width)
+-            color: root.colour
+-
+-            TextMetrics {
+-                id: hourMetrics
+-
+-                font: root.font.build()
+-                text: Time.hourStr
+-            }
+-        }
+-
+-        StyledText {
+-            Layout.topMargin: -parent.spacing - 4
+-            Layout.alignment: Qt.AlignHCenter
+-            text: Time.minuteStr
+-            font: root.fontFor(text, minMetrics.width)
+-            color: root.colour
+-
+-            TextMetrics {
+-                id: minMetrics
+-
+-                font: root.font.build()
+-                text: Time.minuteStr
+-            }
+-        }
+-
+-        Loader {
+-            Layout.topMargin: -parent.spacing - 4
+-            Layout.alignment: Qt.AlignHCenter
+-            asynchronous: true
+-            active: Config.bar.clock.showSeconds
+-            visible: active
+-
+-            sourceComponent: StyledText {
+-                text: Time.format("ss")
+-                font: root.fontFor(text, secMetrics.width)
+-                color: root.colour
+-
+-                TextMetrics {
+-                    id: secMetrics
+-
+-                    font: root.font.build()
+-                    text: Time.format("ss")
+-                }
+-            }
+-        }
+-
+-        Loader {
+-            Layout.topMargin: -parent.spacing - 4
++        AnalogClock {
+             Layout.alignment: Qt.AlignHCenter
+-            asynchronous: true
+-            active: Units.twelveHourClock
+-            visible: active
+-
+-            sourceComponent: StyledText {
+-                text: Time.amPmStr.toLowerCase()
+-                font: Tokens.font.body.builders.small.scale(0.9).build()
+-                color: root.colour
+-            }
++            // Spills a little into the bar's side padding
++            size: Tokens.sizes.bar.innerWidth + 6
++            handColour: root.colour
++            showTicks: true
+         }
+     }
+ }
+diff -ruN a/modules/bar/popouts/ClockPopout.qml b/modules/bar/popouts/ClockPopout.qml
+--- a/modules/bar/popouts/ClockPopout.qml
++++ b/modules/bar/popouts/ClockPopout.qml
+@@ -0,0 +1,45 @@
++import QtQuick
++import QtQuick.Layouts
++import Caelestia.Config
++import qs.components
++import qs.services
++import "../../dashboard/dash"
++
++// Analog clock and month calendar, reusing the dashboard's own pieces
++RowLayout {
++    spacing: Tokens.spacing.medium
++
++    StyledRect {
++        Layout.preferredWidth: calendar.implicitHeight
++        Layout.preferredHeight: calendar.implicitHeight
++
++        radius: Tokens.rounding.extraLarge
++        color: Colours.tPalette.m3surfaceContainer
++
++        AnalogClock {
++            anchors.centerIn: parent
++            size: parent.height - Tokens.padding.large * 2
++            faceColour: Colours.palette.m3surfaceContainerHigh
++            tickColour: Colours.palette.m3onSurfaceVariant
++            handColour: Colours.palette.m3secondary
++            secondColour: Colours.palette.m3primary
++            numberColour: Colours.palette.m3onSurface
++            showSeconds: true
++            showNumbers: true
++        }
++    }
++
++    StyledRect {
++        Layout.preferredWidth: 320
++        Layout.preferredHeight: calendar.implicitHeight
++
++        radius: Tokens.rounding.extraLarge
++        color: Colours.tPalette.m3surfaceContainer
++
++        Calendar {
++            id: calendar
++
++            screenState: ShellState.forActive()
++        }
++    }
++}
+diff -ruN a/modules/bar/popouts/Content.qml b/modules/bar/popouts/Content.qml
+--- a/modules/bar/popouts/Content.qml
++++ b/modules/bar/popouts/Content.qml
+@@ -124,6 +124,11 @@
+             sourceComponent: LockStatus {}
+         }
+ 
++        Popout {
++            name: "clock"
++            sourceComponent: ClockPopout {}
++        }
++
+         Repeater {
+             model: ScriptModel {
+                 values: SystemTray.items.values.filter(i => i.hasMenu && i.status !== Status.Passive && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))

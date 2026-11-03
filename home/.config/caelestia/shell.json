@@ -83,7 +83,8 @@
       }
     ],
     "clock": {
-      "showDate": true
+      "showDate": true,
+      "showIcon": false
     }
   }
 }

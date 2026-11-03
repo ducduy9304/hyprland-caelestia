@@ -204,7 +204,7 @@ mkdir -p ~/.config/caelestia
 cp <this-repo>/home/.config/caelestia/cli.json ~/.config/caelestia/
 ```
 
-Then install the shell, the CLI and the Mesa wrapper. The shell comes from the flake in `home/.config/caelestia/nix`: upstream `caelestia-dots/cli#with-shell` pinned by `flake.lock`, plus three patches: `workspace-attention.patch` makes the bar flash a workspace when a launched app only focused a window that was already open there, and `bar-clock.patch` makes the bar clock bigger and opens the dashboard (calendar, weather, media) when it is clicked, and `bar-app-name.patch` shows the focused app's name under the clock instead of the full window title. Nix remembers the path, so keep the clone where it is. The first build downloads Qt and Quickshell and took about 10 minutes on the reference machine.
+Then install the shell, the CLI and the Mesa wrapper. The shell comes from the flake in `home/.config/caelestia/nix`: upstream `caelestia-dots/cli#with-shell` pinned by `flake.lock`, plus three patches: `workspace-attention.patch` makes the bar flash a workspace when a launched app only focused a window that was already open there, and `bar-clock.patch` turns the bar clock into a small analog face under the date and, when it is clicked, opens a small popout beside the bar with a big analog clock and this month's calendar (reusing the dashboard's calendar), and `bar-app-name.patch` shows the focused app's name under the clock instead of the full window title. Nix remembers the path, so keep the clone where it is. The first build downloads Qt and Quickshell and took about 10 minutes on the reference machine.
 
 ```bash
 nix profile add path:<this-repo>/home/.config/caelestia/nix
@@ -315,7 +315,7 @@ sudo install -m 644 <this-repo>/system/etc/polkit-1/rules.d/50-gsr-kms-server.ru
 | Notification click runs its action, launcher size, weather, no session gif, terminal | `shell.json` |
 | Thinner bar | `shell-tokens.json` |
 | Bar flashes a workspace when a launched app only focused a window already open there | `caelestia/nix/workspace-attention.patch` |
-| Clock in the middle of the bar with the date, focused app's name right under it; bigger digits; click it for the dashboard | `shell.json` (`bar.entries`, `bar.clock.showDate`), `caelestia/nix/bar-clock.patch`, `caelestia/nix/bar-app-name.patch` |
+| Clock in the middle of the bar with weekday, day and month, focused app's name right under it; analog face instead of digits; click it for a big analog clock and calendar popout | `shell.json` (`bar.entries`, `bar.clock.showDate`, `bar.clock.showIcon`), `caelestia/nix/bar-clock.patch`, `caelestia/nix/bar-app-name.patch` |
 | GNOME theme left alone; open terminals keep their own palette (Ptyxis: Monokai Dark) when the scheme changes; btop toggle uses foot | `cli.json` |
 
 ### Adapt these values

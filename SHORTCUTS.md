@@ -104,7 +104,7 @@ Recordings go to `~/Videos/Recordings`.
 | Key | What it does | |
 |---|---|---|
 | `Super + N` | Sidebar: notifications and quick settings | |
-| Click the clock on the bar | Dashboard: calendar, weather, media, system usage. Click again to close | custom |
+| Click the clock on the bar | Popout beside the bar with a big analog clock (numbers and a second hand) and this month's calendar (always opens on the current month). Click again to close | custom |
 | `Ctrl + Alt + C` | Clear all notifications | |
 | `Super + L` | Lock the screen | |
 | `Super + Ctrl + Q` | Lock the screen (Mac-style key) | custom |
