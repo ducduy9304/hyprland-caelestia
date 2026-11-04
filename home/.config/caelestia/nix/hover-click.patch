@@ -1,0 +1,200 @@
+diff -ruN a/modules/bar/Bar.qml b/modules/bar/Bar.qml
+--- a/modules/bar/Bar.qml	2026-11-04 23:44:10.685706706 +0700
++++ b/modules/bar/Bar.qml	2026-11-04 23:44:22.172872077 +0700
+@@ -30,12 +30,19 @@
+         }
+     }
+ 
+-    function checkPopout(y: real): void {
++    // trayOnly: called on hover, where only tray menus open and the other popouts wait for a click
++    function checkPopout(y: real, trayOnly = false): void {
+         const ch = childAt(width / 2, y) as EntryWrapper;
+ 
+         if (ch?.entryId !== "tray")
+             closeTray();
+ 
++        if (trayOnly && ch?.entryId !== "tray") {
++            if (popouts.currentName.startsWith("traymenu"))
++                popouts.hasCurrent = false;
++            return;
++        }
++
+         if (!ch) {
+             popouts.hasCurrent = false;
+             return;
+diff -ruN a/modules/bar/BarWrapper.qml b/modules/bar/BarWrapper.qml
+--- a/modules/bar/BarWrapper.qml	2026-11-04 23:44:10.685801064 +0700
++++ b/modules/bar/BarWrapper.qml	2026-11-04 23:44:23.980904660 +0700
+@@ -28,8 +28,8 @@
+         (content.item as Bar)?.closeTray();
+     }
+ 
+-    function checkPopout(y: real): void {
+-        (content.item as Bar)?.checkPopout(y);
++    function checkPopout(y: real, trayOnly = false): void {
++        (content.item as Bar)?.checkPopout(y, trayOnly);
+     }
+ 
+     function handleWheel(y: real, angleDelta: point): void {
+diff -ruN a/modules/drawers/Interactions.qml b/modules/drawers/Interactions.qml
+--- a/modules/drawers/Interactions.qml	2026-11-04 23:37:16.477715128 +0700
++++ b/modules/drawers/Interactions.qml	2026-11-04 23:44:25.928939767 +0700
+@@ -23,6 +23,20 @@
+     property bool osdShortcutActive
+     property bool utilitiesShortcutActive
+     property bool sidebarShortcutActive
++    // How long the pointer has to rest on the dashboard or utilities edge before the panel opens
++    readonly property int hoverDelay: 500
++
++    // The OSD only opens from volume/brightness changes; hovering an open OSD keeps it open
++    function updateOsdHover(inOsd: bool): void {
++        if (!screenState.osd)
++            return;
++        if (inOsd) {
++            root.panels.osd.hovered = true;
++        } else if (root.panels.osd.hovered) {
++            root.panels.osd.hovered = false;
++            screenState.osd = false;
++        }
++    }
+ 
+     function withinPanelHeight(panel: Item, x: real, y: real): bool {
+         const panelY = root.borderThickness + panel.y;
+@@ -65,13 +79,19 @@
+     hoverEnabled: true
+ 
+     onPressed: event => dragStart = Qt.point(event.x, event.y)
++    // Bar popouts open on click instead of hover; clicking the same entry again closes it
++    onClicked: event => {
++        if (fullscreen || popouts.isDetached || event.x >= bar.implicitWidth)
++            return;
++        const openName = popouts.hasCurrent ? popouts.currentName : "";
++        bar.checkPopout(event.y);
++        if (popouts.hasCurrent && popouts.currentName === openName)
++            popouts.hasCurrent = false;
++    }
+     onContainsMouseChanged: {
+         if (!containsMouse) {
+-            // Only hide if not activated by shortcut
+-            if (!osdShortcutActive) {
+-                screenState.osd = false;
+-                root.panels.osd.hovered = false;
+-            }
++            // A shortcut-opened OSD hides on its own timer
++            updateOsdHover(false);
+ 
+             if (!dashboardShortcutActive)
+                 screenState.dashboard = false;
+@@ -102,7 +122,7 @@
+         const dragY = y - dragStart.y;
+ 
+         if (fullscreen) {
+-            root.panels.osd.hovered = inRightPanel(panels.osdWrapper, x, y);
++            updateOsdHover(inRightPanel(panels.osdWrapper, x, y));
+             return;
+         }
+ 
+@@ -119,18 +139,7 @@
+         }
+ 
+         if (panels.sidebar.offsetScale === 1) {
+-            // Show osd on hover
+-            const showOsd = inRightPanel(panels.osdWrapper, x, y);
+-
+-            // Always update visibility based on hover if not in shortcut mode
+-            if (!osdShortcutActive) {
+-                screenState.osd = showOsd;
+-                root.panels.osd.hovered = showOsd;
+-            } else if (showOsd) {
+-                // If hovering over OSD area while in shortcut mode, transition to hover control
+-                osdShortcutActive = false;
+-                root.panels.osd.hovered = true;
+-            }
++            updateOsdHover(inRightPanel(panels.osdWrapper, x, y));
+ 
+             const showSidebar = pressed && dragStart.x > Math.min(width - Config.border.minThickness, bar.implicitWidth + panels.sidebar.x);
+ 
+@@ -158,18 +167,7 @@
+             }
+         } else {
+             const outOfSidebar = x < width - panels.sidebar.width * (1 - panels.sidebar.offsetScale);
+-            // Show osd on hover
+-            const showOsd = outOfSidebar && inRightPanel(panels.osdWrapper, x, y);
+-
+-            // Always update visibility based on hover if not in shortcut mode
+-            if (!osdShortcutActive) {
+-                screenState.osd = showOsd;
+-                root.panels.osd.hovered = showOsd;
+-            } else if (showOsd) {
+-                // If hovering over OSD area while in shortcut mode, transition to hover control
+-                osdShortcutActive = false;
+-                root.panels.osd.hovered = true;
+-            }
++            updateOsdHover(outOfSidebar && inRightPanel(panels.osdWrapper, x, y));
+ 
+             // Show/hide session on drag
+             if (pressed && outOfSidebar && inRightPanel(panels.sessionWrapper, dragStart.x, dragStart.y) && withinPanelHeight(panels.sessionWrapper, x, y)) {
+@@ -216,7 +214,12 @@
+ 
+         // Always update visibility based on hover if not in shortcut mode
+         if (!dashboardShortcutActive) {
+-            screenState.dashboard = showDashboard;
++            if (!showDashboard) {
++                dashboardHoverTimer.stop();
++                screenState.dashboard = false;
++            } else if (!screenState.dashboard && !dashboardHoverTimer.running) {
++                dashboardHoverTimer.start();
++            }
+         } else if (showDashboard) {
+             // If hovering over dashboard area while in shortcut mode, transition to hover control
+             dashboardShortcutActive = false;
+@@ -235,21 +238,46 @@
+ 
+         // Always update visibility based on hover if not in shortcut mode
+         if (!utilitiesShortcutActive) {
+-            screenState.utilities = showUtilities;
++            if (!showUtilities) {
++                utilitiesHoverTimer.stop();
++                screenState.utilities = false;
++            } else if (!screenState.utilities && !utilitiesHoverTimer.running) {
++                utilitiesHoverTimer.start();
++            }
+         } else if (showUtilities) {
+             // If hovering over utilities area while in shortcut mode, transition to hover control
+             utilitiesShortcutActive = false;
+         }
+ 
+-        // Show popouts on hover
++        // Tray menus still open on hover; the other bar popouts open on click (see onClicked)
+         if (x < bar.implicitWidth) {
+-            bar.checkPopout(y);
++            bar.checkPopout(y, true);
+         } else if ((!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1) && !inLeftPanel(panels.popoutsWrapper, x, y)) {
+             popouts.hasCurrent = false;
+             bar.closeTray();
+         }
+     }
+ 
++    Timer {
++        id: dashboardHoverTimer
++
++        interval: root.hoverDelay
++        onTriggered: {
++            if (root.containsMouse && root.inTopPanel(root.panels.dashboard, root.mouseX, root.mouseY))
++                root.screenState.dashboard = true;
++        }
++    }
++
++    Timer {
++        id: utilitiesHoverTimer
++
++        interval: root.hoverDelay
++        onTriggered: {
++            if (root.containsMouse && root.inBottomPanel(root.panels.utilities, root.mouseX, root.mouseY, true))
++                root.screenState.utilities = true;
++        }
++    }
++
+     // Monitor individual visibility changes
+     Connections {
+         function onLauncherChanged() {
