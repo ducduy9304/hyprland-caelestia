@@ -311,6 +311,7 @@ sudo install -m 644 <this-repo>/system/etc/polkit-1/rules.d/50-gsr-kms-server.ru
 | Next wallpaper on `Super + W` | `hypr-user.lua`, `bin/wallpaper-next` |
 | Starts polkit agent, fcitx5, NetBird tray at login | `hypr-user.lua` |
 | Monitor resolution, refresh rate and position with wdisplays (shows up as "wdisplays" in the launcher). It only changes the layout until logout; to keep one, write `hl.monitor({ output = "desc:...", mode = "1920x1080@165", position = "0x0", scale = 1 })` lines into `~/.config/hypr/monitors.lua` (values from `hyprctl monitors`), which `hypr-user.lua` loads | `hypr-user.lua`, `share/applications/network.cycles.wdisplays.desktop` |
+| Zotero opens from the launcher. Its own `zotero.desktop` finds the install folder through `%k`, which Quickshell leaves empty, so this copy calls `/opt/zotero/zotero` directly. Change the path if Zotero lives somewhere else | `share/applications/zotero.desktop` |
 | Default apps, cursor, disabled default binds | `hypr-vars.lua` |
 | Notification click runs its action, launcher size, weather, no session gif, terminal | `shell.json` |
 | Thinner bar | `shell-tokens.json` |

@@ -173,6 +173,7 @@ After editing a Hyprland file, run `hyprctl reload`. A red bar at the top means 
 | `.config/environment.d/90-fcitx5.conf` | Input method variables for every session |
 | `.config/autostart/org.fcitx.Fcitx5.desktop` | Starts fcitx5 in the GNOME session |
 | `.local/share/applications/network.cycles.wdisplays.desktop` | Names the monitor settings app "wdisplays" so the launcher finds it |
+| `.local/share/applications/zotero.desktop` | Starts Zotero from `/opt/zotero` with a plain path, because the Caelestia launcher cannot run the `%k` trick in Zotero's own desktop file |
 | `.local/bin/caelestia` | Runs the Nix-built shell through nixGL (Mesa or NVIDIA) |
 | `.local/bin/install-nixgl-nvidia` | Builds nixGLNvidia for the running driver. Run after each NVIDIA driver update |
 | `.local/bin/capture` | Screenshot and screen recording for `Super + Shift + S` and `Super + Shift + R` |
