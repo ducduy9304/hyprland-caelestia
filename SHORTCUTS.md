@@ -17,7 +17,7 @@ Every key and gesture on this setup, checked against `hyprctl binds` on the refe
 | `Super + Alt + 1` … `0` | Move the window to workspace 1 to 10 and follow it |
 | `Super + Shift + S` | Screenshot: drag for a region, click for the whole screen |
 | `Super + Space` | Switch English / Vietnamese (fcitx5 + Bamboo) |
-| `Ctrl + Alt + Delete` | Session menu: lock, log out, reboot, shut down |
+| `Ctrl + Alt + Delete` | Session menu: lock, log out, reboot, shut down. Resting the pointer on the middle of the right edge for half a second opens it too |
 
 ## Apps
 

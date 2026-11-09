@@ -1,6 +1,6 @@
 diff -ruN a/modules/bar/Bar.qml b/modules/bar/Bar.qml
---- a/modules/bar/Bar.qml	2026-11-04 23:44:10.685706706 +0700
-+++ b/modules/bar/Bar.qml	2026-11-04 23:44:22.172872077 +0700
+--- a/modules/bar/Bar.qml	2026-11-09 22:48:29.066234474 +0700
++++ b/modules/bar/Bar.qml	2026-11-09 22:48:29.096213732 +0700
 @@ -30,12 +30,19 @@
          }
      }
@@ -23,8 +23,8 @@ diff -ruN a/modules/bar/Bar.qml b/modules/bar/Bar.qml
              popouts.hasCurrent = false;
              return;
 diff -ruN a/modules/bar/BarWrapper.qml b/modules/bar/BarWrapper.qml
---- a/modules/bar/BarWrapper.qml	2026-11-04 23:44:10.685801064 +0700
-+++ b/modules/bar/BarWrapper.qml	2026-11-04 23:44:23.980904660 +0700
+--- a/modules/bar/BarWrapper.qml	2026-11-09 22:48:29.066589491 +0700
++++ b/modules/bar/BarWrapper.qml	2026-11-09 22:48:29.096385324 +0700
 @@ -28,8 +28,8 @@
          (content.item as Bar)?.closeTray();
      }
@@ -37,13 +37,14 @@ diff -ruN a/modules/bar/BarWrapper.qml b/modules/bar/BarWrapper.qml
  
      function handleWheel(y: real, angleDelta: point): void {
 diff -ruN a/modules/drawers/Interactions.qml b/modules/drawers/Interactions.qml
---- a/modules/drawers/Interactions.qml	2026-11-04 23:37:16.477715128 +0700
-+++ b/modules/drawers/Interactions.qml	2026-11-04 23:44:25.928939767 +0700
-@@ -23,6 +23,20 @@
+--- a/modules/drawers/Interactions.qml	2026-11-09 22:48:29.061611185 +0700
++++ b/modules/drawers/Interactions.qml	2026-11-09 22:48:59.856519339 +0700
+@@ -23,6 +23,21 @@
      property bool osdShortcutActive
      property bool utilitiesShortcutActive
      property bool sidebarShortcutActive
-+    // How long the pointer has to rest on the dashboard or utilities edge before the panel opens
++    property bool sessionShortcutActive
++    // How long the pointer has to rest on the dashboard, utilities or session edge before the panel opens
 +    readonly property int hoverDelay: 500
 +
 +    // The OSD only opens from volume/brightness changes; hovering an open OSD keeps it open
@@ -60,7 +61,7 @@ diff -ruN a/modules/drawers/Interactions.qml b/modules/drawers/Interactions.qml
  
      function withinPanelHeight(panel: Item, x: real, y: real): bool {
          const panelY = root.borderThickness + panel.y;
-@@ -65,13 +79,19 @@
+@@ -65,13 +80,19 @@
      hoverEnabled: true
  
      onPressed: event => dragStart = Qt.point(event.x, event.y)
@@ -85,7 +86,17 @@ diff -ruN a/modules/drawers/Interactions.qml b/modules/drawers/Interactions.qml
  
              if (!dashboardShortcutActive)
                  screenState.dashboard = false;
-@@ -102,7 +122,7 @@
+@@ -79,6 +100,9 @@
+             if (!utilitiesShortcutActive)
+                 screenState.utilities = false;
+ 
++            if (!sessionShortcutActive)
++                screenState.session = false;
++
+             if (!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1) {
+                 popouts.hasCurrent = false;
+                 bar.closeTray();
+@@ -102,7 +126,7 @@
          const dragY = y - dragStart.y;
  
          if (fullscreen) {
@@ -94,7 +105,7 @@ diff -ruN a/modules/drawers/Interactions.qml b/modules/drawers/Interactions.qml
              return;
          }
  
-@@ -119,18 +139,7 @@
+@@ -119,18 +143,7 @@
          }
  
          if (panels.sidebar.offsetScale === 1) {
@@ -114,13 +125,15 @@ diff -ruN a/modules/drawers/Interactions.qml b/modules/drawers/Interactions.qml
  
              const showSidebar = pressed && dragStart.x > Math.min(width - Config.border.minThickness, bar.implicitWidth + panels.sidebar.x);
  
-@@ -158,18 +167,7 @@
+@@ -156,20 +169,19 @@
+                 // Show sidebar on drag if not in session area
+                 screenState.sidebar = true;
              }
-         } else {
-             const outOfSidebar = x < width - panels.sidebar.width * (1 - panels.sidebar.offsetScale);
+-        } else {
+-            const outOfSidebar = x < width - panels.sidebar.width * (1 - panels.sidebar.offsetScale);
 -            // Show osd on hover
 -            const showOsd = outOfSidebar && inRightPanel(panels.osdWrapper, x, y);
--
+ 
 -            // Always update visibility based on hover if not in shortcut mode
 -            if (!osdShortcutActive) {
 -                screenState.osd = showOsd;
@@ -129,12 +142,22 @@ diff -ruN a/modules/drawers/Interactions.qml b/modules/drawers/Interactions.qml
 -                // If hovering over OSD area while in shortcut mode, transition to hover control
 -                osdShortcutActive = false;
 -                root.panels.osd.hovered = true;
--            }
++            // Show session after resting on its edge; one opened this way hides when the pointer leaves
++            if (!pressed && !sessionShortcutActive) {
++                if (!inRightPanel(panels.sessionWrapper, x, y)) {
++                    sessionHoverTimer.stop();
++                    screenState.session = false;
++                } else if (!screenState.session && !sessionHoverTimer.running) {
++                    sessionHoverTimer.start();
++                }
+             }
++        } else {
++            const outOfSidebar = x < width - panels.sidebar.width * (1 - panels.sidebar.offsetScale);
 +            updateOsdHover(outOfSidebar && inRightPanel(panels.osdWrapper, x, y));
  
              // Show/hide session on drag
              if (pressed && outOfSidebar && inRightPanel(panels.sessionWrapper, dragStart.x, dragStart.y) && withinPanelHeight(panels.sessionWrapper, x, y)) {
-@@ -216,7 +214,12 @@
+@@ -216,7 +228,12 @@
  
          // Always update visibility based on hover if not in shortcut mode
          if (!dashboardShortcutActive) {
@@ -148,7 +171,7 @@ diff -ruN a/modules/drawers/Interactions.qml b/modules/drawers/Interactions.qml
          } else if (showDashboard) {
              // If hovering over dashboard area while in shortcut mode, transition to hover control
              dashboardShortcutActive = false;
-@@ -235,21 +238,46 @@
+@@ -235,21 +252,56 @@
  
          // Always update visibility based on hover if not in shortcut mode
          if (!utilitiesShortcutActive) {
@@ -195,6 +218,28 @@ diff -ruN a/modules/drawers/Interactions.qml b/modules/drawers/Interactions.qml
 +        }
 +    }
 +
++    Timer {
++        id: sessionHoverTimer
++
++        interval: root.hoverDelay
++        onTriggered: {
++            if (root.containsMouse && !root.pressed && root.panels.sidebar.offsetScale === 1 && root.inRightPanel(root.panels.sessionWrapper, root.mouseX, root.mouseY))
++                root.screenState.session = true;
++        }
++    }
++
      // Monitor individual visibility changes
      Connections {
          function onLauncherChanged() {
+@@ -313,6 +365,11 @@
+             }
+         }
+ 
++        function onSessionChanged() {
++            // Opened from the power button or a shortcut: stays open until closed the same way
++            root.sessionShortcutActive = root.screenState.session && !root.inRightPanel(root.panels.sessionWrapper, root.mouseX, root.mouseY);
++        }
++
+         function onSidebarChanged() {
+             if (root.screenState.sidebar) {
+                 // Sidebar became visible, immediately check if this should be shortcut mode
