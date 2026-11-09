@@ -50,7 +50,8 @@ hl.device({
 -- Wireless mouse speed
 hl.device({
     name        = "cx-wireless-mouse--1k-dongle-mouse",
-    sensitivity = -0.2,   -- pointer speed: -1 (slowest) to 1 (fastest)
+    sensitivity = 0.0,   -- pointer speed: -1 (slowest) to 1 (fastest)
+    accel_profile = "flat", -- no acceleration
 })
 
 -- Drag the gap between windows to resize them, like GNOME
