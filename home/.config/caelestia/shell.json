@@ -13,7 +13,7 @@
   "general": {
     "apps": {
       "terminal": [
-        "ptyxis"
+        "gnome-terminal"
       ]
     },
     "idle": {

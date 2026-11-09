@@ -2,7 +2,7 @@ return {
     browser     = "brave-browser",
     editor      = "code",
     fileExplorer = "nautilus",
-    terminal    = "ptyxis --new-window",
+    terminal    = "gnome-terminal --window",
     -- Caelestia also writes the cursor to GNOME's settings, so keep GNOME's default
     cursorTheme = "Yaru",
     cursorSize  = 24,

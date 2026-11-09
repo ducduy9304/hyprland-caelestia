@@ -40,13 +40,6 @@ hl.config({ input = { touchpad = { clickfinger_behavior = true } } })
 -- Num Lock on after login
 hl.config({ input = { numlock_by_default = true } })
 
--- Touchpad speed (only the touchpad, not the wireless mouse). Edit, save, then run: hyprctl reload
-hl.device({
-    name          = "elan06fa:00-04f3:31ad-touchpad",
-    sensitivity   = 0.3,   -- pointer speed: -1 (slowest) to 1 (fastest)
-    scroll_factor = 0.3, -- two-finger scroll speed: 0.3 is slow, 1.0 is like GNOME
-})
-
 -- Wireless mouse speed
 hl.device({
     name        = "cx-wireless-mouse--1k-dongle-mouse",
@@ -155,5 +148,3 @@ end)
 -- Saved monitor layout (~/.config/hypr/monitors.lua, hl.monitor lines). wdisplays only changes it until logout
 pcall(require, "monitors")
 
--- label_defect inspection app (uv run app/label_check_app.py) always opens on the MSI screen
-hl.window_rule({ match = { title = "AITS ROBOT - label inspection" }, monitor = "desc:Microstep MSI MP242L" })
