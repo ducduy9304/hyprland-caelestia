@@ -38,7 +38,7 @@
   "services": {
     "sensorUnits": "Celsius",
     "weatherUnits": "Celsius",
-    "weatherLocation": "10.9289,108.1021"
+    "weatherLocation": "10.7769,106.7009"
   },
   "paths": {
     "sessionGif": ""

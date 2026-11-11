@@ -331,7 +331,7 @@ sudo install -m 644 <this-repo>/system/etc/polkit-1/rules.d/50-gsr-kms-server.ru
 | `brave-browser`, `code`, `nautilus`, `ptyxis --new-window` | `hypr-vars.lua` | Use the person's apps. Check each with `command -v` |
 | `cursorTheme = "Yaru"` | `hypr-vars.lua` | Caelestia writes the cursor into GNOME's settings too, so use GNOME's current one: `gsettings get org.gnome.desktop.interface cursor-theme` (`Adwaita` on Fedora and Arch) |
 | `general.apps.terminal` | `shell.json` | Same terminal as `hypr-vars.lua` |
-| `services.weatherLocation` (`"10.9289,108.1021"`, Phan Thiết) | `shell.json` | The person's city as `"lat,lon"`, or delete the key to use IP location |
+| `services.weatherLocation` (`"10.7769,106.7009"`, Ho Chi Minh City) | `shell.json` | The person's city as `"lat,lon"`, or delete the key to use IP location |
 | `kbBrowser = {}` | `hypr-vars.lua` | Turns off `Super + W` for the browser because the wallpaper script uses it. Remove both if the person prefers the browser key |
 | `hl.window_rule` for "AITS ROBOT - label inspection" | `hypr-user.lua` | Personal app pinned to the MSI monitor. Delete it on other machines |
 | `monitors/` per-screen overrides | not copied | Create `~/.config/caelestia/monitors/<name>/shell.json` only if needed (`hyprctl monitors -j \| jq -r '.[].name'`) |
