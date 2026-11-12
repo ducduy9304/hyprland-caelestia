@@ -40,19 +40,19 @@ hl.config({ input = { touchpad = { clickfinger_behavior = true } } })
 -- Num Lock on after login
 hl.config({ input = { numlock_by_default = true } })
 
--- Touchpad speed (only the touchpad, not the wireless mouse). Edit, save, then run: hyprctl reload
+-- Touchpad speed (only the touchpad, not the mice). Edit, save, then run: hyprctl reload
 hl.device({
     name          = "elan06fa:00-04f3:31ad-touchpad",
     sensitivity   = 0.3,   -- pointer speed: -1 (slowest) to 1 (fastest)
+    accel_profile = "adaptive", -- keep acceleration here, the mouse default below turns it off
     scroll_factor = 0.3, -- two-finger scroll speed: 0.3 is slow, 1.0 is like GNOME
 })
 
--- Wireless mouse speed
-hl.device({
-    name        = "cx-wireless-mouse--1k-dongle-mouse",
-    sensitivity = 0.0,   -- pointer speed: -1 (slowest) to 1 (fastest)
+-- Speed for every mouse, wired or wireless, whatever its device name
+hl.config({ input = {
+    sensitivity   = 0.0,    -- pointer speed: -1 (slowest) to 1 (fastest)
     accel_profile = "flat", -- no acceleration
-})
+} })
 
 -- Drag the gap between windows to resize them, like GNOME
 hl.config({ general = { resize_on_border = true, extend_border_grab_area = 15 } })
