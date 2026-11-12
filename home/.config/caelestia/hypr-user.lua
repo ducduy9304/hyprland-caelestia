@@ -40,12 +40,11 @@ hl.config({ input = { touchpad = { clickfinger_behavior = true } } })
 -- Num Lock on after login
 hl.config({ input = { numlock_by_default = true } })
 
--- Wireless mouse speed
-hl.device({
-    name        = "cx-wireless-mouse--1k-dongle-mouse",
-    sensitivity = 0.0,   -- pointer speed: -1 (slowest) to 1 (fastest)
+-- Speed for every mouse, wired or wireless, whatever its device name
+hl.config({ input = {
+    sensitivity   = 0.0,    -- pointer speed: -1 (slowest) to 1 (fastest)
     accel_profile = "flat", -- no acceleration
-})
+} })
 
 -- Drag the gap between windows to resize them, like GNOME
 hl.config({ general = { resize_on_border = true, extend_border_grab_area = 15 } })

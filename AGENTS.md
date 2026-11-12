@@ -327,7 +327,7 @@ sudo install -m 644 <this-repo>/system/etc/polkit-1/rules.d/50-gsr-kms-server.ru
 
 | Value | File | How to adapt |
 |---|---|---|
-| `elan06fa:00-04f3:31ad-touchpad`, `cx-wireless-mouse--1k-dongle-mouse` | `hypr-user.lua` | Get real names from `hyprctl devices`. Delete the block on a PC without a touchpad |
+| `elan06fa:00-04f3:31ad-touchpad` | `hypr-user.lua` | Get the real name from `hyprctl devices`. Delete the block on a PC without a touchpad. Mouse speed and acceleration are set once for every mouse (`input.sensitivity`, `input.accel_profile`), so no mouse names are needed |
 | `hl.exec_cmd("netbird-ui")` | `hypr-user.lua` | Delete unless NetBird is installed. Hyprland does not read `~/.config/autostart`, so other tray apps the person uses in GNOME go here |
 | dGPU detection block | `hypr-user.lua` | Harmless on Intel/AMD-only machines. On NVIDIA-only machines it sets the NVIDIA VA-API/GLX variables, which is correct |
 | `brave-browser`, `code`, `nautilus`, `ptyxis --new-window` | `hypr-vars.lua` | Use the person's apps. Check each with `command -v` |
