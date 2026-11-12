@@ -1,0 +1,29 @@
+diff -ruN a/modules/nexus/pages/bluetooth/BluetoothPairing.qml b/modules/nexus/pages/bluetooth/BluetoothPairing.qml
+--- a/modules/nexus/pages/bluetooth/BluetoothPairing.qml
++++ b/modules/nexus/pages/bluetooth/BluetoothPairing.qml
+@@ -18,8 +18,11 @@
+     readonly property BluetoothAdapter adapter: Bluetooth.defaultAdapter
+ 
+     function setScan(on: bool): void {
+-        if (adapter?.enabled)
++        if (adapter?.enabled) {
+             adapter.discovering = on;
++            // BlueZ only keeps pairings (bonds) while pairable, and without an agent it leaves pairable off
++            adapter.pairable = on;
++        }
+     }
+ 
+     title: Tr.tr("Pair new device")
+@@ -98,8 +101,11 @@
+ 
+                 Connections {
+                     function onPairedChanged(): void {
+-                        if (newDevice.wasPairing && newDevice.modelData?.paired)
++                        if (newDevice.wasPairing && newDevice.modelData?.paired) {
++                            // No agent answers the device's later reconnects, so trust it to let them through
++                            newDevice.modelData.trusted = true;
+                             root.nState.closeSubPage();
++                        }
+                     }
+ 
+                     target: newDevice.modelData
