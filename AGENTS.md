@@ -304,6 +304,7 @@ sudo install -m 644 <this-repo>/system/etc/polkit-1/rules.d/50-gsr-kms-server.ru
 | Touchpad: 2-finger right click, speed, gestures | `hypr-user.lua`, `hypr-vars.lua` |
 | Drag the gap between windows to resize | `hypr-user.lua` |
 | `Super + Shift + arrows` re-splits two windows so the focused one lands on that side | `hypr-user.lua` |
+| No automatic HDR switch for fullscreen windows | `hypr-user.lua` |
 | Emergency exit, `Super + M` exit, Mac-style extras | `hypr-user.lua`, `hypr-vars.lua` |
 | `Super + Alt + ←→` moves the window to the previous / next workspace | `hypr-vars.lua` |
 | `Super + V` clipboard picker | `hypr-user.lua`, `hypr-vars.lua`, `bin/clipboard` |
@@ -419,6 +420,7 @@ Every row here happened on the reference machine.
 | Tray and tray-menu icons show as pink and black squares | The Nix-built shell cannot load the `qtengine` Qt plugin, so the `Papirus-Dark` icon theme in `~/.config/qtengine/config.json` is ignored | `papirus-icon-theme` from Phase 4 and `QS_ICON_THEME` in `hypr-user.lua` |
 | After an hour idle the laptop does not go to sleep | The idle action was `systemctl suspend-then-hibernate`, but hibernation needs swap at least the size of RAM plus a `resume=` kernel parameter. The reference machine has a 4 GB swap file and no `resume=`, so `busctl call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager CanSuspendThenHibernate` says `no` and nothing happens | `shell.json` now runs `systemctl suspend` |
 | Pairing a headset from the Bluetooth panel seems to fail, or it is forgotten after disconnecting | No pairing agent runs in Hyprland, and BlueZ (`AlwaysPairable = false`) keeps the adapter non-pairable without one, so the device pairs without bonding | `bt-pairing.patch` |
+| Going fullscreen in the browser takes seconds, with a message that 10-bit colour is not supported | `render:cm_auto_hdr` switches an HDR-capable monitor to HDR when a fullscreen window shows HDR video. That forces a modeset and needs a 10-bit link, which 1080p 144 Hz over HDMI did not give | `cm_auto_hdr = 0` in `hypr-user.lua` |
 | NVIDIA looks awake at 8 W in `nvidia-smi` | `nvidia-smi` wakes the card to read it | Read `power/runtime_status` in sysfs instead |
 
 ## Updating and rolling back
