@@ -53,6 +53,9 @@ hl.config({ general = { resize_on_border = true, extend_border_grab_area = 15 } 
 -- New windows always split to the right/bottom instead of following the mouse
 hl.config({ dwindle = { force_split = 2 } })
 
+-- Fullscreen HDR video made Hyprland switch the monitor to HDR, which is slow and fails without a 10-bit link
+hl.config({ render = { cm_auto_hdr = 0 } })
+
 -- Next wallpaper in ~/Pictures/Wallpapers, in order (SUPER + W no longer opens the browser, see hypr-vars.lua)
 hl.bind("SUPER + W", hl.dsp.exec_cmd(home .. "/.local/bin/wallpaper-next"))
 
