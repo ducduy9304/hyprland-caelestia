@@ -305,6 +305,7 @@ sudo install -m 644 <this-repo>/system/etc/polkit-1/rules.d/50-gsr-kms-server.ru
 | Drag the gap between windows to resize | `hypr-user.lua` |
 | `Super + Shift + arrows` re-splits two windows so the focused one lands on that side | `hypr-user.lua` |
 | No automatic HDR switch for fullscreen windows | `hypr-user.lua` |
+| Workspaces follow the monitor layout: the leftmost screen gets workspace 1, the next one 2, and so on, at login and whenever the layout changes. No monitor names are involved | `hypr-user.lua` |
 | Emergency exit, `Super + M` exit, Mac-style extras | `hypr-user.lua`, `hypr-vars.lua` |
 | `Super + Alt + ←→` moves the window to the previous / next workspace | `hypr-vars.lua` |
 | `Super + V` clipboard picker | `hypr-user.lua`, `hypr-vars.lua`, `bin/clipboard` |

@@ -60,6 +60,30 @@ hl.config({ general = { resize_on_border = true, extend_border_grab_area = 15 } 
 -- New windows always split to the right/bottom instead of following the mouse
 hl.config({ dwindle = { force_split = 2 } })
 
+-- Workspaces follow the monitor layout: the leftmost screen gets workspace 1, the next one 2, and so on
+local function order_workspaces()
+    local mons = hl.get_monitors()
+    table.sort(mons, function(a, b)
+        if a.x ~= b.x then return a.x < b.x end
+        return a.y < b.y
+    end)
+    local focused = hl.get_active_monitor()
+    local moved = false
+    for i, m in ipairs(mons) do
+        hl.workspace_rule({ workspace = tostring(i), monitor = m.name, default = true })
+        local ws = hl.get_workspace(i)
+        if ws and ws.monitor and ws.monitor.name ~= m.name then
+            hl.dispatch(hl.dsp.workspace.move({ workspace = i, monitor = m.name }))
+            hl.dispatch(hl.dsp.focus({ workspace = i })) -- a moved workspace is not shown on its new screen by itself
+            moved = true
+        end
+    end
+    if moved and focused then hl.dispatch(hl.dsp.focus({ monitor = focused.name })) end
+end
+order_workspaces()
+hl.on("hyprland.start", order_workspaces)
+hl.on("monitor.layout_changed", order_workspaces)
+
 -- Fullscreen HDR video made Hyprland switch the monitor to HDR, which is slow and fails without a 10-bit link
 hl.config({ render = { cm_auto_hdr = 0 } })
 
