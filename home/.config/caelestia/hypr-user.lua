@@ -180,6 +180,10 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("netbird-ui")
 end)
 
+-- Any screen on HDMI runs at its highest refresh rate unless monitors.lua names it.
+-- Overrides the fixed 1920x1080@99.65 HDMI-A-1 rule in ~/.config/hypr/hyprland.lua, which held a 144 Hz screen at 100 Hz
+hl.monitor({ output = "HDMI-A-1", mode = "highrr", position = "auto", scale = 1 })
+
 -- Saved monitor layout (~/.config/hypr/monitors.lua, hl.monitor lines). wdisplays only changes it until logout
 pcall(require, "monitors")
 
