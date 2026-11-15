@@ -1,0 +1,244 @@
+diff -ruN a/modules/switcher/Switcher.qml b/modules/switcher/Switcher.qml
+--- a/modules/switcher/Switcher.qml	1970-01-01 08:00:00.000000000 +0800
++++ b/modules/switcher/Switcher.qml	2026-11-15 22:25:00.324224409 +0700
+@@ -0,0 +1,221 @@
++pragma ComponentBehavior: Bound
++
++import QtQuick
++import QtQuick.Layouts
++import Quickshell
++import Quickshell.Hyprland
++import Quickshell.Wayland
++import Quickshell.Widgets
++import Caelestia.Config
++import qs.components
++import qs.components.containers
++import qs.components.misc
++import qs.services
++import qs.utils
++
++// Alt + Tab window switcher: a row of window previews, most recently used first.
++// Hyprland owns the keys and calls the global shortcuts below:
++//   switcherNext / switcherPrev  open the popup, or move the selection while it is open
++//   switcherCommit               (ALT released) focuses the selected window and closes the popup
++//   switcherCancel               closes the popup without switching
++Scope {
++    id: root
++
++    // Windows shown in the popup. Frozen while the popup is open, so the order does not jump around.
++    property list<HyprlandToplevel> windows
++    property int selected
++    readonly property bool open: loader.active
++
++    function recentWindows(): list<HyprlandToplevel> {
++        const shown = Hypr.toplevels.values.filter(t => {
++            const ipc = t.lastIpcObject;
++            // Skip windows on special workspaces (negative id)
++            return ipc?.mapped && !ipc.hidden && ipc.workspace?.id > 0;
++        });
++        shown.sort((a, b) => a.lastIpcObject.focusHistoryID - b.lastIpcObject.focusHistoryID);
++        return shown;
++    }
++
++    function step(direction: int): void {
++        if (!open) {
++            windows = recentWindows();
++            if (windows.length === 0)
++                return;
++            // Start on the focused window, so the first step lands on the one used before it.
++            // On an empty workspace nothing is focused, and the first step lands on the newest window.
++            // The newest window is the focused one exactly when it sits on the focused workspace.
++            const focusedIsFirst = windows[0].lastIpcObject.workspace.id === Hypr.activeWsId;
++            selected = focusedIsFirst ? 0 : -direction;
++            loader.active = true;
++        }
++        const count = windows.length;
++        selected = ((selected + direction) % count + count) % count;
++    }
++
++    function commit(): void {
++        if (!open)
++            return;
++        const target = windows[selected];
++        close();
++        if (target)
++            Hypr.dispatch(Hypr.usingLua ? `hl.dsp.focus({ window = "address:0x${target.address}" })` : `focuswindow address:0x${target.address}`);
++    }
++
++    function close(): void {
++        loader.active = false;
++        windows = [];
++    }
++
++    LazyLoader {
++        id: loader
++
++        StyledWindow {
++            id: win
++
++            // Size of the box each preview is fitted into
++            readonly property int previewWidth: 256
++            readonly property int previewHeight: 144
++            readonly property int maxColumns: Math.max(1, Math.floor((screen.width * 0.9 - Tokens.padding.large * 2) / (previewWidth + Tokens.padding.medium * 2 + Tokens.spacing.small)))
++
++            screen: Quickshell.screens.find(s => s.name === Hypr.focusedMonitor?.name) ?? Quickshell.screens[0]
++            name: "switcher"
++            WlrLayershell.exclusionMode: ExclusionMode.Ignore
++            WlrLayershell.layer: WlrLayer.Overlay
++            // Hyprland binds drive the popup, so it never needs the keyboard
++            WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
++
++            // No anchors: the compositor centres the window on the screen
++            implicitWidth: background.implicitWidth
++            implicitHeight: background.implicitHeight
++
++            StyledRect {
++                id: background
++
++                implicitWidth: grid.implicitWidth + Tokens.padding.large * 2
++                implicitHeight: grid.implicitHeight + Tokens.padding.large * 2
++
++                color: Colours.palette.m3surfaceContainer
++                radius: Tokens.rounding.large
++                border.width: 1
++                border.color: Colours.palette.m3outlineVariant
++
++                GridLayout {
++                    id: grid
++
++                    anchors.centerIn: parent
++                    columns: Math.min(root.windows.length, win.maxColumns)
++                    columnSpacing: Tokens.spacing.small
++                    rowSpacing: Tokens.spacing.small
++
++                    Repeater {
++                        model: root.windows
++
++                        StyledRect {
++                            id: card
++
++                            required property HyprlandToplevel modelData
++                            required property int index
++                            readonly property bool isSelected: index === root.selected
++                            readonly property string appClass: modelData.lastIpcObject.class ?? ""
++
++                            implicitWidth: win.previewWidth + Tokens.padding.medium * 2
++                            implicitHeight: content.implicitHeight + Tokens.padding.medium * 2
++
++                            color: isSelected ? Colours.palette.m3secondaryContainer : "transparent"
++                            radius: Tokens.rounding.medium
++                            border.width: 2
++                            border.color: isSelected ? Colours.palette.m3primary : "transparent"
++
++                            ColumnLayout {
++                                id: content
++
++                                anchors.fill: parent
++                                anchors.margins: Tokens.padding.medium
++                                spacing: Tokens.spacing.small
++
++                                RowLayout {
++                                    Layout.fillWidth: true
++                                    spacing: Tokens.spacing.small
++
++                                    IconImage {
++                                        implicitSize: 20
++                                        source: Icons.getAppIcon(card.appClass, "application-x-executable")
++                                    }
++
++                                    StyledText {
++                                        Layout.fillWidth: true
++                                        text: card.modelData.title
++                                        elide: Text.ElideRight
++                                        maximumLineCount: 1
++                                        color: card.isSelected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
++                                        font: Tokens.font.body.medium
++                                    }
++                                }
++
++                                ClipRect {
++                                    Layout.preferredWidth: win.previewWidth
++                                    Layout.preferredHeight: win.previewHeight
++
++                                    color: Colours.palette.m3surfaceContainerHighest
++                                    radius: Tokens.rounding.small
++
++                                    // Shown until the preview arrives, and when a window cannot be captured
++                                    IconImage {
++                                        anchors.centerIn: parent
++                                        implicitSize: 64
++                                        source: Icons.getAppIcon(card.appClass, "application-x-executable")
++                                        visible: !preview.hasContent
++                                    }
++
++                                    ScreencopyView {
++                                        id: preview
++
++                                        anchors.centerIn: parent
++                                        captureSource: card.modelData.wayland
++                                        live: false
++                                        constraintSize.width: win.previewWidth
++                                        constraintSize.height: win.previewHeight
++                                    }
++                                }
++                            }
++                        }
++                    }
++                }
++            }
++        }
++    }
++
++    // qmllint disable unresolved-type
++    CustomShortcut {
++        // qmllint enable unresolved-type
++        name: "switcherNext"
++        description: "Window switcher: next window"
++        onPressed: root.step(1)
++    }
++
++    // qmllint disable unresolved-type
++    CustomShortcut {
++        // qmllint enable unresolved-type
++        name: "switcherPrev"
++        description: "Window switcher: previous window"
++        onPressed: root.step(-1)
++    }
++
++    // qmllint disable unresolved-type
++    CustomShortcut {
++        // qmllint enable unresolved-type
++        name: "switcherCommit"
++        description: "Window switcher: focus the selected window"
++        // Bound to the release of ALT; Hyprland may report that as either signal
++        onPressed: root.commit()
++        onReleased: root.commit()
++    }
++
++    // qmllint disable unresolved-type
++    CustomShortcut {
++        // qmllint enable unresolved-type
++        name: "switcherCancel"
++        description: "Window switcher: close without switching"
++        onPressed: root.close()
++    }
++}
+diff -ruN a/shell.qml b/shell.qml
+--- a/shell.qml	2026-11-15 22:23:51.743971863 +0700
++++ b/shell.qml	2026-11-15 22:23:51.750083596 +0700
+@@ -12,6 +12,7 @@
+ import qs.modules.background
+ import qs.modules.drawers
+ import qs.modules.lock
++import qs.modules.switcher
+ import qs.daemons
+ 
+ ShellRoot {
+@@ -44,6 +45,7 @@
+     Background {}
+     Drawers {}
+     AreaPicker {}
++    Switcher {}
+     Lock {
+         id: lock
+     }

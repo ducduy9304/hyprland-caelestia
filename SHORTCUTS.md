@@ -43,7 +43,8 @@ Every key and gesture on this setup, checked against `hyprctl binds` on the refe
 | `Super + Alt + Space` | Float / unfloat the window | |
 | `Super + ←↑→↓` | Move focus to the window in that direction | |
 | `Super + Shift + ←↑→↓` | Move the window that way. With two windows side by side, `Shift + ↓` stacks them top/bottom and puts this one at the bottom (same idea for the other arrows) | custom |
-| `Super + Tab` | Focus the next window | custom |
+| `Super + Tab` | Focus the next window on this workspace | custom |
+| `Alt + Tab` | Window switcher: previews of all windows on any workspace, most recently used first. Keep `Alt` down and press `Tab` to move the selection (`Shift + Tab` goes back), release `Alt` to switch, `Escape` to cancel | custom |
 | `Super + Minus` / `Super + Equal` | Make the window narrower / wider | |
 | `Super + Shift + Minus` / `Super + Shift + Equal` | Make the window shorter / taller | |
 | `Super + Alt + ↑↓` | Same resizing, with arrows | |
