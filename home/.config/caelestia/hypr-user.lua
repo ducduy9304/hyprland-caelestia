@@ -155,6 +155,37 @@ for _, dir in ipairs({ "left", "right", "up", "down" }) do
     hl.bind("SUPER + SHIFT + " .. dir, function() move_or_split(dir) end)
 end
 
+-- ALT + Tab opens the shell's window switcher (caelestia/nix/switcher.patch): previews of all windows,
+-- most recently used first. Tab moves the selection, releasing ALT focuses it, ALT + Escape cancels.
+local switcher_open = false
+
+local function switcher_send(action)
+    hl.dispatch(hl.dsp.global("caelestia:switcher" .. action))
+end
+
+hl.bind("ALT + Tab", function()
+    switcher_open = true
+    switcher_send("Next")
+end, { repeating = true })
+hl.bind("SHIFT + ALT + Tab", function()
+    switcher_open = true
+    switcher_send("Prev")
+end, { repeating = true })
+hl.bind("ALT + Escape", function()
+    switcher_open = false
+    switcher_send("Cancel")
+end)
+
+-- A release bind on ALT only fires after a lone tap of ALT, never after ALT + Tab, so watch the raw key events.
+local KEY_LEFTALT = 64   -- xkb key codes (evdev code + 8), as the event reports them
+local KEY_RIGHTALT = 108
+hl.on("input.keyboard.key", function(key, _time, pressed)
+    if switcher_open and pressed == 0 and (key == KEY_LEFTALT or key == KEY_RIGHTALT) then
+        switcher_open = false
+        switcher_send("Commit")
+    end
+end)
+
 -- Emergency exit back to the login screen, works even if Caelestia is broken
 hl.bind("CTRL + SUPER + SHIFT + Escape", hl.dsp.exit())
 

@@ -26,6 +26,10 @@ return {
     kbPrevWs = { "SUPER + mouse_up", "CTRL + SUPER + Left", "SUPER + Page_Up", "SUPER + J" },
     kbShowPanels = {},
 
+    -- ALT + Tab opens the window switcher: in hypr-user.lua
+    kbWindowCycleNext = {},
+    kbWindowCyclePrev = {},
+
     -- SUPER + ALT + Left / Right move the window to the previous / next workspace instead of resizing it
     kbMoveWinToWsNext     = { "SUPER + ALT + mouse_down", "SUPER + ALT + Page_Down", "CTRL + SUPER + SHIFT + Right", "SUPER + ALT + Right" },
     kbMoveWinToWsPrev     = { "SUPER + ALT + mouse_up", "SUPER + ALT + Page_Up", "CTRL + SUPER + SHIFT + Left", "SUPER + ALT + Left" },
