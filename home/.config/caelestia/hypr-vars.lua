@@ -36,7 +36,7 @@ return {
     kbWindowDecreaseWidth = "SUPER + Minus",
     kbWindowIncreaseWidth = "SUPER + Equal",
 
-    -- SUPER + M exits Hyprland, SUPER + Space switches input method, SUPER + V opens the clipboard picker: all in hypr-user.lua
+    -- SUPER + M exits Hyprland, SUPER + Space switches input method, SUPER + V opens the clipboard popup: all in hypr-user.lua
     kbMusicWs      = {},
     kbClipboard    = {},
     kbClipboardDel = {},

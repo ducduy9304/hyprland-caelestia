@@ -168,7 +168,7 @@ After editing a Hyprland file, run `hyprctl reload`. A red bar at the top means 
 | `.config/caelestia/hypr-vars.lua` | Overrides for Caelestia's variables: apps, cursor, swapped keys, gesture fingers |
 | `.config/caelestia/shell.json`, `shell-tokens.json` | Shell settings and a thinner bar |
 | `.config/caelestia/cli.json` | Keeps Caelestia out of GNOME's theme and terminal colours, fixes the btop toggle |
-| `.config/caelestia/nix/` | Nix flake that builds the shell and CLI at a pinned commit, plus patches that flash a workspace when a launched app was already open there, turn the bar clock into an analog face with a clock and calendar popout on click, show the app name instead of the window title, fix missing notification icons, make panels open on click or after a short hover instead of on a passing pointer, let the Bluetooth panel pair devices without a separate pairing agent, and add the `Alt + Tab` window switcher |
+| `.config/caelestia/nix/` | Nix flake that builds the shell and CLI at a pinned commit, plus patches that flash a workspace when a launched app was already open there, turn the bar clock into an analog face with a clock and calendar popout on click, show the app name instead of the window title, fix missing notification icons, make panels open on click or after a short hover instead of on a passing pointer, let the Bluetooth panel pair devices without a separate pairing agent, and add the `Alt + Tab` window switcher and a clipboard popup with image previews |
 | `.config/fcitx5/` | English + Vietnamese (Bamboo), `Super + Space` to switch |
 | `.config/environment.d/90-fcitx5.conf` | Input method variables for every session |
 | `.config/autostart/org.fcitx.Fcitx5.desktop` | Starts fcitx5 in the GNOME session |

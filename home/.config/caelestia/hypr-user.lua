@@ -85,9 +85,9 @@ hl.bind("SUPER + W", hl.dsp.exec_cmd(home .. "/.local/bin/wallpaper-next"))
 -- English / Vietnamese with an EN/VI notification (fcitx5 never sees SUPER + Space, Hyprland takes it first)
 hl.bind("SUPER + Space", hl.dsp.exec_cmd(home .. "/.local/bin/fcitx5-switch"))
 
--- Clipboard picker on SUPER + V, SUPER + ALT + V deletes an entry
-hl.bind("SUPER + V", hl.dsp.exec_cmd("pkill fuzzel || " .. home .. "/.local/bin/clipboard"))
-hl.bind("SUPER + ALT + V", hl.dsp.exec_cmd("pkill fuzzel || " .. home .. "/.local/bin/clipboard -d"))
+-- Clipboard history popup with image previews on SUPER + V (caelestia/nix/clipboard.patch, bin/clipboard).
+-- Inside it: Enter pastes, Shift + Delete removes an entry, Escape closes.
+hl.bind("SUPER + V", hl.dsp.global("caelestia:clipboard"))
 
 -- SUPER + M quits to the login screen (Caelestia's music workspace key is turned off in hypr-vars.lua)
 hl.bind("SUPER + M", hl.dsp.exit())
