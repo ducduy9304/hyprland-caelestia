@@ -1,0 +1,253 @@
+diff -ruN a/modules/clipboard/Clipboard.qml b/modules/clipboard/Clipboard.qml
+--- a/modules/clipboard/Clipboard.qml	1970-01-01 08:00:00.000000000 +0800
++++ b/modules/clipboard/Clipboard.qml	2026-11-16 21:46:26.973225642 +0700
+@@ -0,0 +1,230 @@
++pragma ComponentBehavior: Bound
++
++import QtQuick
++import QtQuick.Layouts
++import Quickshell
++import Quickshell.Io
++import Quickshell.Wayland
++import Caelestia.Config
++import qs.components
++import qs.components.containers
++import qs.components.controls
++import qs.components.misc
++import qs.services
++import qs.utils
++
++// Clipboard history popup (SUPER + V): a vertical list of entries, images shown as previews.
++// The data comes from ~/.local/bin/clipboard, which wraps cliphist.
++// Type to search, arrows move, Enter pastes, Shift + Delete removes an entry, Escape closes.
++Scope {
++    id: root
++
++    readonly property string script: `${Paths.home}/.local/bin/clipboard`
++    // Each entry: { image: path or "", line: raw cliphist line, text: line without the id }
++    property var entries: []
++    property string query
++    readonly property var shown: entries.filter(e => e.text.toLowerCase().includes(query.toLowerCase()))
++
++    function open(): void {
++        query = "";
++        listProc.running = true;
++        loader.active = true;
++    }
++
++    function close(): void {
++        loader.active = false;
++    }
++
++    function paste(entry: var): void {
++        close();
++        Quickshell.execDetached([script, "--paste", entry.line]);
++    }
++
++    function remove(entry: var): void {
++        deleteProc.command = [script, "--delete", entry.line];
++        deleteProc.running = true;
++    }
++
++    Process {
++        id: listProc
++
++        command: [root.script, "--list"]
++        stdout: StdioCollector {
++            onStreamFinished: {
++                const result = [];
++                for (const row of text.split("\n")) {
++                    if (!row)
++                        continue;
++                    const tab = row.indexOf("\t");
++                    const line = row.slice(tab + 1);
++                    result.push({
++                        image: row.slice(0, tab),
++                        line: line,
++                        text: line.slice(line.indexOf("\t") + 1)
++                    });
++                }
++                root.entries = result;
++            }
++        }
++    }
++
++    Process {
++        id: deleteProc
++
++        onExited: listProc.running = true
++    }
++
++    LazyLoader {
++        id: loader
++
++        StyledWindow {
++            id: win
++
++            readonly property int listWidth: 560
++            readonly property int previewHeight: 144
++
++            screen: Quickshell.screens.find(s => s.name === Hypr.focusedMonitor?.name) ?? Quickshell.screens[0]
++            name: "clipboard"
++            WlrLayershell.exclusionMode: ExclusionMode.Ignore
++            WlrLayershell.layer: WlrLayer.Overlay
++            WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
++
++            // No anchors: the compositor centres the window on the screen
++            implicitWidth: background.implicitWidth
++            implicitHeight: background.implicitHeight
++
++            StyledRect {
++                id: background
++
++                implicitWidth: layout.implicitWidth + Tokens.padding.large * 2
++                implicitHeight: layout.implicitHeight + Tokens.padding.large * 2
++
++                color: Colours.palette.m3surfaceContainer
++                radius: Tokens.rounding.large
++                border.width: 1
++                border.color: Colours.palette.m3outlineVariant
++
++                ColumnLayout {
++                    id: layout
++
++                    anchors.centerIn: parent
++                    spacing: Tokens.spacing.medium
++
++                    SearchBar {
++                        id: search
++
++                        Layout.fillWidth: true
++                        placeholderText: qsTr("Search clipboard")
++                        onTextChanged: {
++                            root.query = text;
++                            grid.currentIndex = 0;
++                        }
++
++                        onAccepted: {
++                            const entry = root.shown[grid.currentIndex];
++                            if (entry)
++                                root.paste(entry);
++                        }
++
++                        Keys.onEscapePressed: root.close()
++                        Keys.onUpPressed: grid.decrementCurrentIndex()
++                        Keys.onDownPressed: grid.incrementCurrentIndex()
++                        Keys.onPressed: event => {
++                            if (event.key === Qt.Key_Tab) {
++                                grid.incrementCurrentIndex();
++                                event.accepted = true;
++                            } else if (event.key === Qt.Key_Delete && (event.modifiers & Qt.ShiftModifier)) {
++                                const entry = root.shown[grid.currentIndex];
++                                if (entry)
++                                    root.remove(entry);
++                                event.accepted = true;
++                            }
++                        }
++
++                        Component.onCompleted: forceActiveFocus()
++                    }
++
++                    ListView {
++                        id: grid
++
++                        Layout.preferredWidth: win.listWidth
++                        Layout.preferredHeight: Math.max(60, Math.min(contentHeight, win.screen.height * 0.7))
++                        clip: true
++                        spacing: Tokens.spacing.small
++                        model: root.shown
++                        highlightFollowsCurrentItem: false
++
++                        StyledText {
++                            anchors.centerIn: parent
++                            visible: grid.count === 0
++                            text: listProc.running ? qsTr("Loading…") : qsTr("Clipboard is empty")
++                            color: Colours.palette.m3onSurfaceVariant
++                        }
++
++                        delegate: StyledRect {
++                            id: card
++
++                            required property var modelData
++                            required property int index
++                            readonly property bool isSelected: index === grid.currentIndex
++                            readonly property bool isImage: modelData.image !== ""
++
++                            width: win.listWidth
++                            implicitHeight: (isImage ? win.previewHeight : label.implicitHeight) + Tokens.padding.medium * 2
++
++                            color: isSelected ? Colours.palette.m3secondaryContainer : "transparent"
++                            radius: Tokens.rounding.medium
++                            border.width: 2
++                            border.color: isSelected ? Colours.palette.m3primary : "transparent"
++
++                            Image {
++                                anchors.left: parent.left
++                                anchors.top: parent.top
++                                anchors.margins: Tokens.padding.medium
++                                width: parent.width - Tokens.padding.medium * 2
++                                height: win.previewHeight
++                                visible: card.isImage
++                                source: card.isImage ? `file://${card.modelData.image}` : ""
++                                sourceSize.height: win.previewHeight * 2
++                                fillMode: Image.PreserveAspectFit
++                                horizontalAlignment: Image.AlignLeft
++                                asynchronous: true
++                                cache: false
++                            }
++
++                            StyledText {
++                                id: label
++
++                                anchors.left: parent.left
++                                anchors.right: parent.right
++                                anchors.verticalCenter: parent.verticalCenter
++                                anchors.margins: Tokens.padding.medium
++                                visible: !card.isImage
++                                text: card.modelData.text
++                                elide: Text.ElideRight
++                                maximumLineCount: 1
++                                color: card.isSelected ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
++                                font: Tokens.font.body.medium
++                            }
++
++                            MouseArea {
++                                anchors.fill: parent
++                                hoverEnabled: true
++                                onEntered: grid.currentIndex = card.index
++                                onClicked: root.paste(card.modelData)
++                            }
++                        }
++                    }
++                }
++            }
++        }
++    }
++
++    // qmllint disable unresolved-type
++    CustomShortcut {
++        // qmllint enable unresolved-type
++        name: "clipboard"
++        description: "Open or close the clipboard history"
++        onPressed: loader.active ? root.close() : root.open()
++    }
++}
+diff -ruN a/shell.qml b/shell.qml
+--- a/shell.qml	2026-11-16 21:40:53.273514669 +0700
++++ b/shell.qml	2026-11-16 21:41:25.220940736 +0700
+@@ -13,6 +13,7 @@
+ import qs.modules.drawers
+ import qs.modules.lock
+ import qs.modules.switcher
++import qs.modules.clipboard
+ import qs.daemons
+ 
+ ShellRoot {
+@@ -46,6 +47,7 @@
+     Drawers {}
+     AreaPicker {}
+     Switcher {}
++    Clipboard {}
+     Lock {
+         id: lock
+     }

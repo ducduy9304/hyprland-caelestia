@@ -121,8 +121,7 @@ Recordings go to `~/Videos/Recordings`.
 
 | Key | What it does |
 |---|---|
-| `Super + V` | Clipboard history |
-| `Super + Alt + V` | Delete an item from clipboard history |
+| `Super + V` | Clipboard history popup: a vertical list with image previews. Type to search, arrows move, `Enter` pastes, `Shift + Delete` removes the selected item, `Escape` closes |
 | `Super + Period` | Emoji picker |
 | `Super + Space` | English / Vietnamese (fcitx5 + Bamboo), shows an EN/VI notification |
 
