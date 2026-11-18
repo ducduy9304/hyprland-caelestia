@@ -1,0 +1,11 @@
+[Unit]
+Description=Clear the clipboard history (cliphist) and its image thumbnails once per boot
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/cliphist wipe
+ExecStart=/bin/rm -rf %h/.cache/cliphist-thumbs
+
+[Install]
+# With lingering on, the user manager starts once per boot, so this runs at boot, not at every login
+WantedBy=default.target
