@@ -276,6 +276,7 @@ install -m 755 <this-repo>/home/.local/bin/* ~/.local/bin/     # route B: skip c
 cp -r <this-repo>/home/.local/share/. ~/.local/share/
 mkdir -p ~/Pictures/Wallpapers ~/Pictures/Screenshots
 hyprctl reload; hyprctl configerrors
+systemctl --user daemon-reload && systemctl --user enable cliphist-wipe.service
 ```
 
 The reference machine links the files instead of copying them, so edits land in the repo and can be committed. To do the same, use an absolute repo path (fcitx5 rewrites its `profile` on exit, which turns that one link back into a plain file; that is harmless):
@@ -285,6 +286,8 @@ cp -rs --remove-destination /abs/path/to/repo/home/.config/. ~/.config/
 cp -rs --remove-destination /abs/path/to/repo/home/.local/bin/. ~/.local/bin/
 cp -rs --remove-destination /abs/path/to/repo/home/.local/share/. ~/.local/share/
 ```
+
+Run the `systemctl --user` line above after linking too. `enable` adds a link in `~/.config/systemd/user/default.target.wants`, which stays out of the repo.
 
 Two things are per machine and stay out of the repo: `~/.config/hypr/monitors.lua` (saved monitor layout, see the wdisplays row below) and the images in `~/Pictures/Wallpapers`. On a reinstall of the same machine, copy them over from the backup.
 
@@ -309,6 +312,7 @@ sudo install -m 644 <this-repo>/system/etc/polkit-1/rules.d/50-gsr-kms-server.ru
 | Emergency exit, `Super + M` exit, Mac-style extras | `hypr-user.lua`, `hypr-vars.lua` |
 | `Super + Alt + ←→` moves the window to the previous / next workspace | `hypr-vars.lua` |
 | `Super + V` clipboard popup, a vertical list with image previews; `Enter` pastes, `Shift + Delete` removes an entry | `caelestia/nix/clipboard.patch`, `hypr-user.lua`, `hypr-vars.lua`, `bin/clipboard` |
+| Clipboard history is cleared once per boot, like Windows. It runs when the user manager starts, which is once per boot only with lingering on (`loginctl enable-linger`); without it, every login clears it | `systemd/user/cliphist-wipe.service` |
 | `Super + J` / `Super + K` switch to the previous / next workspace | `hypr-vars.lua` |
 | `Alt + Tab` opens a window switcher with previews, most recently used first; `Tab` moves the selection, releasing `Alt` switches, `Escape` cancels | `caelestia/nix/switcher.patch`, `hypr-user.lua`, `hypr-vars.lua` |
 | Next wallpaper on `Super + W` | `hypr-user.lua`, `bin/wallpaper-next` |
