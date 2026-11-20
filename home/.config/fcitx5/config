@@ -4,3 +4,5 @@
 [Behavior]
 # Hide fcitx5 popup on IM switch; the Hyprland-bound script shows a notification instead
 ShowInputMethodInformation=False
+# One EN/VI state for every window; the default keeps a separate state per window, so changing focus flips the mode
+ShareInputState=All
